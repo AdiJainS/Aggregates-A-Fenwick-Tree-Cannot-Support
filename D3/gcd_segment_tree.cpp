@@ -60,15 +60,48 @@ public:
 
 
 int main() {
-    GcdSegmentTree sensors({12, 18, 0, 30, 42});
-    cout << sensors.query(0, 5) << '\n';
-    cout << sensors.query(1, 4) << '\n';
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
 
-    sensors.assign(1, 5);
-    cout << sensors.query(0, 5) << '\n';
-
-
-    sensors.assign(1, 0);
-    cout << sensors.query(0, 3) << '\n';
-    cout << sensors.query(2, 2) << '\n';
+    int n, operations;
+    if (!(cin >> n >> operations) || n < 0 || n > 1000000 || operations < 0) {
+        cerr << "Invalid array size or operation count\n";
+        return 1;
+    }
+    vector<Value> values(n);
+    long long input;
+    for (int i = 0; i < n; ++i) {
+        if (!(cin >> input) || input < 0 || input > 1000000000) {
+            cerr << "Values must be between 0 and 1000000000\n";
+            return 1;
+        }
+        values[i] = input;
+    }
+    GcdSegmentTree tree(values);
+    for (int step = 0; step < operations; ++step) {
+        char operation;
+        if (!(cin >> operation)) {
+            cerr << "Missing operation\n";
+            return 1;
+        }
+        if (operation == 'U') {
+            int index;
+            if (!(cin >> index >> input) || index < 0 || index >= n ||
+                input < 0 || input > 1000000000) {
+                cerr << "Invalid assignment\n";
+                return 1;
+            }
+            tree.assign(index, input);
+        } else if (operation == 'Q') {
+            int left, right;
+            if (!(cin >> left >> right) || left < 0 || left > right || right > n) {
+                cerr << "Invalid range\n";
+                return 1;
+            }
+            cout << tree.query(left, right) << '\n';
+        } else {
+            cerr << "Use U for assignment or Q for query\n";
+            return 1;
+        }
+    }
 }
