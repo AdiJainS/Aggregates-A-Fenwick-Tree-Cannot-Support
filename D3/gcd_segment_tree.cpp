@@ -311,7 +311,7 @@ int main(int argc, char* argv[]) {
     try {
         int result;
         if (argc == 1) result = replay();
-        else if (argc == 2 && string(argv[1]) == "--test") result = tests(10000);
+        else if (argc == 2 && string(argv[1]) == "--test") result = tests(1000000);
         else if (argc == 2 && string(argv[1]) == "--scale") result = scale_run();
         else throw runtime_error("Usage: sensor_replay [--test|--scale]");
         if (argc > 1) {
