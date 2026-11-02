@@ -269,6 +269,42 @@ int tests(int operations) {
     return 0;
 }
 
+int scale_run() {
+    const int n = 1000000, operations = 1000000;
+    unsigned long long seed = 253;
+    vector<Sensor> sensors(n);
+    for (Sensor& sensor : sensors) {
+        sensor.reading = static_cast<long long>((next_random(seed) >> 32) % 1000000001);
+        sensor.calibration = (next_random(seed) >> 32) % 1000000001;
+    }
+    SensorReplay app(sensors);
+    Value checksum = 0;
+    int updates = 0, queries = 0;
+    for (int step = 0; step < operations; ++step) {
+        if (step % 2 == 0) {
+            int index = static_cast<int>((next_random(seed) >> 32) % n);
+            long long reading = static_cast<long long>((next_random(seed) >> 32) % 1000000001);
+            Value calibration = (next_random(seed) >> 32) % 1000000001;
+            Sensor value{reading, calibration};
+            app.assign(index, value);
+            sensors[index] = value;
+            ++updates;
+        } else {
+            int left = static_cast<int>((next_random(seed) >> 32) % n);
+            int width = 1 + static_cast<int>((next_random(seed) >> 32) % (n-left));
+            Answer result = app.query(left, left + width);
+            checksum = checksum * 31 + static_cast<Value>(result.maximum) +
+                       static_cast<Value>(result.count) + result.gcd;
+            if (queries % 10000 == 0) check_range(sensors, app, left, left + width, false);
+            ++queries;
+        }
+    }
+    cout << "elements,operations,updates,queries,seed,checksum\n";
+    cout << n << ',' << operations << ',' << updates << ',' << queries
+         << ",253," << checksum << '\n';
+    return 0;
+}
+
 int main(int argc, char* argv[]) {
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
@@ -276,8 +312,8 @@ int main(int argc, char* argv[]) {
         int result;
         if (argc == 1) result = replay();
         else if (argc == 2 && string(argv[1]) == "--test") result = tests(10000);
-
-        else throw runtime_error("Usage: sensor_replay [--test]");
+        else if (argc == 2 && string(argv[1]) == "--scale") result = scale_run();
+        else throw runtime_error("Usage: sensor_replay [--test|--scale]");
         if (argc > 1) {
             cerr << "gcd_merges=" << gcd_merges << " remainder_steps=" << remainder_steps
                  << " max_merges=" << max_merges << '\n';
