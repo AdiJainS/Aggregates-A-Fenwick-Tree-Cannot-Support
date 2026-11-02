@@ -211,6 +211,17 @@ void check_range(const vector<Sensor>& sensors, const SensorReplay& app,
 }
 
 int tests(int operations) {
+    SensorReplay boundary_check({{10, 6}, {99, 35}, {7, 10}});
+    Answer single = boundary_check.query(0, 1);
+    if (single.maximum != 10 || single.count != 1 || single.gcd != 6)
+        throw runtime_error("Left-inclusive, right-exclusive boundary test failed");
+    Answer empty = boundary_check.query(1, 1);
+    if (empty.maximum != -1 || empty.count != 0 || empty.gcd != 0)
+        throw runtime_error("Empty range boundary test failed");
+    Answer tail = boundary_check.query(2, 3);
+    if (tail.maximum != 7 || tail.count != 1 || tail.gcd != 10)
+        throw runtime_error("Right boundary at array size failed");
+
     for (int n = 0; n <= 17; ++n) {
         vector<Sensor> sensors(n, {0, 0});
         SensorReplay app(sensors);
