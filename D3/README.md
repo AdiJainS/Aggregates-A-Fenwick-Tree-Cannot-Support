@@ -49,3 +49,5 @@ Expected output:
 ```
 
 `Q 0 1` includes only sensor 0. The assignment lowers sensor 1's reading from 99 to 4 and replaces its calibration factor with 14. The next query covers all three sensors: the maximum is 10, it occurs once, and gcd(6,14,10) is 2. The last query is empty because its endpoints are equal. Assignments do not print output.
+
+Sensor indices run from `0` to `n - 1`. A query may use `right = n` to include the last sensor, while `left = right` selects an empty range.
