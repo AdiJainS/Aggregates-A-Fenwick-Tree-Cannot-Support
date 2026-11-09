@@ -24,3 +24,28 @@ Queries use zero-based [left,right): left included, right excluded. Input begins
 Diagnostic counters on stderr include construction, tree operations, and small-test invariant audits; oracle arithmetic is excluded. They are not isolated benchmark timings. Five-run timing means/spread, cache profiling, the Structure B comparison, failure shrinking, adversarial generators, and the final tagged team release remain separate team deliverables.
 
 The generic segment tree is the Architect application's runnable reference backend. Coordinate its replacement with Structure A's owner. A Structure B maximum-only adapter is not implemented here. The D3 proof is in docs/derivations/D3_Anushri_Maheshwari.pdf.
+
+## Short replay example
+
+The following input starts with three sensors, then runs four operations:
+
+```text
+3 4
+10 6
+99 35
+7 10
+Q 0 1
+U 1 4 14
+Q 0 3
+Q 1 1
+```
+
+Expected output:
+
+```text
+10 1 6
+10 1 2
+-1 0 0
+```
+
+`Q 0 1` includes only sensor 0. The assignment lowers sensor 1's reading from 99 to 4 and replaces its calibration factor with 14. The next query covers all three sensors: the maximum is 10, it occurs once, and gcd(6,14,10) is 2. The last query is empty because its endpoints are equal. Assignments do not print output.
