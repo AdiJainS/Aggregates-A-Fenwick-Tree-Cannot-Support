@@ -15,6 +15,13 @@ private:
         return i & -i;
     }
 
+    long long bigger(long long x, long long y) const {
+        if (x > y) {
+            return x;
+        }
+        return y;
+    }
+
     long long slowMax(int from, int to) const {
         long long best = LLONG_MIN;
         for (int k = from; k <= to; k++) {
@@ -23,6 +30,36 @@ private:
             }
         }
         return best;
+    }
+
+    long long queryPos(int l, int r) const {
+        if (l > r) {
+            return LLONG_MIN;
+        }
+
+        long long result = LLONG_MIN;
+
+        int left = l;
+        while (left + lowbit(left) <= r) {
+            if (bit2[left] > result) {
+                result = bit2[left];
+            }
+            left = left + lowbit(left);
+        }
+
+        int right = r;
+        while (right - lowbit(right) >= l) {
+            if (bit1[right] > result) {
+                result = bit1[right];
+            }
+            right = right - lowbit(right);
+        }
+
+        if (a[left] > result) {
+            result = a[left];
+        }
+
+        return result;
     }
 
 public:
@@ -54,31 +91,38 @@ public:
             throw std::out_of_range("Invalid query range");
         }
 
-        l = l + 1;
-        r = r + 1;
+        return queryPos(l + 1, r + 1);
+    }
 
-        long long result = LLONG_MIN;
+    void assign(int index, long long value) {
+        if (index < 0 || index >= n) {
+            throw std::out_of_range("Invalid index");
+        }
 
-        int left = l;
-        while (left + lowbit(left) <= r) {
-            if (bit2[left] > result) {
-                result = bit2[left];
+        int p = index + 1;
+        a[p] = value;
+
+        int x = p;
+        while (x <= n) {
+            int start = x - lowbit(x) + 1;
+            long long best = value;
+            best = bigger(best, queryPos(start, p - 1));
+            best = bigger(best, queryPos(p + 1, x));
+            bit1[x] = best;
+            x = x + lowbit(x);
+        }
+
+        x = p;
+        while (x >= 1) {
+            int end = x + lowbit(x) - 1;
+            if (end > n) {
+                end = n;
             }
-            left = left + lowbit(left);
+            long long best = value;
+            best = bigger(best, queryPos(x, p - 1));
+            best = bigger(best, queryPos(p + 1, end));
+            bit2[x] = best;
+            x = x - lowbit(x);
         }
-
-        int right = r;
-        while (right - lowbit(right) >= l) {
-            if (bit1[right] > result) {
-                result = bit1[right];
-            }
-            right = right - lowbit(right);
-        }
-
-        if (a[left] > result) {
-            result = a[left];
-        }
-
-        return result;
     }
 };
