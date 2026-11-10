@@ -1,7 +1,5 @@
 # Planning
 
-This plan predicts the costs of the Project 5 structures across range widths and update mixes, then specifies how to benchmark them.
-
 This is the model I plan to test for the sensor-array project. It describes the work done by each structure, rather than claiming a fixed number of nanoseconds per operation. The constants will depend on the implementation and machine. I will keep this draft as the pre-measurement record and put the measured comparison in `REPORT.md` later.
 
 ## Workload and notation
