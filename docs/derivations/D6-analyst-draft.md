@@ -1,6 +1,4 @@
-# D6: predicted costs for Project 5
-
-Adi Jain, Analyst. Draft: 10 November 2026, before benchmark timings.
+# D6 Planning: predicted costs for Project 5
 
 This is the model I plan to test for the sensor-array project. It describes the work done by each structure, rather than claiming a fixed number of nanoseconds per operation. The constants will depend on the implementation and machine. I will keep this draft as the pre-measurement record and put the measured comparison in `REPORT.md` later.
 
