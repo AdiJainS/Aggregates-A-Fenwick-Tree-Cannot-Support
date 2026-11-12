@@ -35,3 +35,26 @@ inline Workload makeRebuildWorkload(int n, int k) {
 
     return workload;
 }
+
+// Generate repeated difficult queries for a power-of-two array size.
+inline Workload makeQueryWorkload(int n, int queryCount) {
+    if (n < 4 || (n & (n - 1)) != 0 || queryCount < 1) {
+        throw std::invalid_argument(
+            "Require power-of-two n >= 4 and queryCount >= 1"
+        );
+    }
+
+    Workload workload;
+
+    for (int i = 0; i < n; i++) {
+        workload.initial.push_back(i + 1);
+    }
+
+    for (int i = 0; i < queryCount; i++) {
+        workload.operations.push_back({
+            OpType::QUERY_MAX, 0, n - 2, 0
+        });
+    }
+
+    return workload;
+}
