@@ -37,13 +37,16 @@ private:
                 tree[x] = value;
             }
             x = x + lowbit(x);
+            raiseSteps++;
         }
     }
 
 public:
+    mutable long long queryBlocks;
+    long long raiseSteps;
+
     PrefixFenwickMax(const std::vector<long long>& values) {
         n = (int)values.size();
-        rebuilds = 0;
 
         a.assign(n + 1, LLONG_MIN);
         tree.assign(n + 1, LLONG_MIN);
@@ -52,8 +55,15 @@ public:
             a[i + 1] = values[i];
         }
 
-        rebuild();
         rebuilds = 0;
+        rebuild();
+        resetCounters();
+    }
+
+    void resetCounters() {
+        rebuilds = 0;
+        queryBlocks = 0;
+        raiseSteps = 0;
     }
 
     long long queryPrefix(int r) const {
@@ -69,6 +79,7 @@ public:
                 result = tree[i];
             }
             i = i - lowbit(i);
+            queryBlocks++;
         }
 
         return result;

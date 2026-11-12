@@ -34,7 +34,7 @@ private:
         return best;
     }
 
-    long long queryPos(int l, int r) const {
+    long long queryPos(int l, int r, long long& steps) const {
         if (l > r) {
             return LLONG_MIN;
         }
@@ -47,6 +47,7 @@ private:
                 result = bit2[left];
             }
             left = left + lowbit(left);
+            steps++;
         }
 
         int right = r;
@@ -55,16 +56,25 @@ private:
                 result = bit1[right];
             }
             right = right - lowbit(right);
+            steps++;
         }
 
         if (a[left] > result) {
             result = a[left];
         }
+        steps++;
 
         return result;
     }
 
 public:
+    mutable long long queries;
+    mutable long long queryBlocks;
+    long long assigns;
+    long long assignBlocks;
+    long long changedBlocks;
+    long long loweredBlocks;
+
     FenwickMax(const std::vector<long long>& values) {
         n = (int)values.size();
 
@@ -88,6 +98,17 @@ public:
             }
             bit2[i] = slowMax(i, end);
         }
+
+        resetCounters();
+    }
+
+    void resetCounters() {
+        queries = 0;
+        queryBlocks = 0;
+        assigns = 0;
+        assignBlocks = 0;
+        changedBlocks = 0;
+        loweredBlocks = 0;
     }
 
     long long queryMax(int l, int r) const {
@@ -95,13 +116,16 @@ public:
             throw std::out_of_range("Invalid query range");
         }
 
-        return queryPos(l + 1, r + 1);
+        queries++;
+        return queryPos(l + 1, r + 1, queryBlocks);
     }
 
     void assignSlow(int index, long long value) {
         if (index < 0 || index >= n) {
             throw std::out_of_range("Invalid index");
         }
+
+        assigns++;
 
         int p = index + 1;
         a[p] = value;
@@ -110,9 +134,18 @@ public:
         while (x <= n) {
             int start = x - lowbit(x) + 1;
             long long best = value;
-            best = bigger(best, queryPos(start, p - 1));
-            best = bigger(best, queryPos(p + 1, x));
+            best = bigger(best, queryPos(start, p - 1, assignBlocks));
+            best = bigger(best, queryPos(p + 1, x, assignBlocks));
+
+            if (best != bit1[x]) {
+                changedBlocks++;
+            }
+            if (best < bit1[x]) {
+                loweredBlocks++;
+            }
             bit1[x] = best;
+
+            assignBlocks++;
             x = x + lowbit(x);
         }
 
@@ -123,9 +156,18 @@ public:
                 end = n;
             }
             long long best = value;
-            best = bigger(best, queryPos(x, p - 1));
-            best = bigger(best, queryPos(p + 1, end));
+            best = bigger(best, queryPos(x, p - 1, assignBlocks));
+            best = bigger(best, queryPos(p + 1, end, assignBlocks));
+
+            if (best != bit2[x]) {
+                changedBlocks++;
+            }
+            if (best < bit2[x]) {
+                loweredBlocks++;
+            }
             bit2[x] = best;
+
+            assignBlocks++;
             x = x - lowbit(x);
         }
     }
@@ -134,6 +176,8 @@ public:
         if (index < 0 || index >= n) {
             throw std::out_of_range("Invalid index");
         }
+
+        assigns++;
 
         int p = index + 1;
         a[p] = value;
@@ -144,6 +188,7 @@ public:
             rightBefore[q] = run;
             run = bigger(run, bit2[q]);
             q = q + lowbit(q);
+            assignBlocks++;
         }
         long long rightAll = run;
 
@@ -153,6 +198,7 @@ public:
             leftBefore[u] = run;
             run = bigger(run, bit1[u]);
             u = u - lowbit(u);
+            assignBlocks++;
         }
         long long leftAll = run;
 
@@ -172,7 +218,15 @@ public:
                 best = bigger(best, bigger(rightBefore[x], a[x]));
             }
 
+            if (best != bit1[x]) {
+                changedBlocks++;
+            }
+            if (best < bit1[x]) {
+                loweredBlocks++;
+            }
             bit1[x] = best;
+
+            assignBlocks++;
             x = x + lowbit(x);
         }
 
@@ -192,7 +246,15 @@ public:
                 best = bigger(best, rightBefore[after]);
             }
 
+            if (best != bit2[y]) {
+                changedBlocks++;
+            }
+            if (best < bit2[y]) {
+                loweredBlocks++;
+            }
             bit2[y] = best;
+
+            assignBlocks++;
             y = y - lowbit(y);
         }
     }
