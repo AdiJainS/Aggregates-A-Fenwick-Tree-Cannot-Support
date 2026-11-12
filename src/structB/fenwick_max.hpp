@@ -10,6 +10,8 @@ private:
     std::vector<long long> a;
     std::vector<long long> bit1;
     std::vector<long long> bit2;
+    std::vector<long long> leftBefore;
+    std::vector<long long> rightBefore;
 
     int lowbit(int i) const {
         return i & -i;
@@ -69,6 +71,8 @@ public:
         a.assign(n + 1, LLONG_MIN);
         bit1.assign(n + 1, LLONG_MIN);
         bit2.assign(n + 1, LLONG_MIN);
+        leftBefore.assign(n + 2, LLONG_MIN);
+        rightBefore.assign(n + 2, LLONG_MIN);
 
         for (int i = 0; i < n; i++) {
             a[i + 1] = values[i];
@@ -94,7 +98,7 @@ public:
         return queryPos(l + 1, r + 1);
     }
 
-    void assign(int index, long long value) {
+    void assignSlow(int index, long long value) {
         if (index < 0 || index >= n) {
             throw std::out_of_range("Invalid index");
         }
@@ -124,5 +128,76 @@ public:
             bit2[x] = best;
             x = x - lowbit(x);
         }
+    }
+
+    void assign(int index, long long value) {
+        if (index < 0 || index >= n) {
+            throw std::out_of_range("Invalid index");
+        }
+
+        int p = index + 1;
+        a[p] = value;
+
+        long long run = LLONG_MIN;
+        int q = p + 1;
+        while (q <= n) {
+            rightBefore[q] = run;
+            run = bigger(run, bit2[q]);
+            q = q + lowbit(q);
+        }
+        long long rightAll = run;
+
+        run = LLONG_MIN;
+        int u = p - 1;
+        while (u >= 1) {
+            leftBefore[u] = run;
+            run = bigger(run, bit1[u]);
+            u = u - lowbit(u);
+        }
+        long long leftAll = run;
+
+        int x = p;
+        while (x <= n) {
+            long long best = value;
+
+            int before = x - lowbit(x);
+            if (before == 0) {
+                best = bigger(best, leftAll);
+            }
+            else {
+                best = bigger(best, leftBefore[before]);
+            }
+
+            if (x > p) {
+                best = bigger(best, bigger(rightBefore[x], a[x]));
+            }
+
+            bit1[x] = best;
+            x = x + lowbit(x);
+        }
+
+        int y = p;
+        while (y >= 1) {
+            long long best = value;
+
+            if (y < p) {
+                best = bigger(best, bigger(leftBefore[y], a[y]));
+            }
+
+            int after = y + lowbit(y);
+            if (after > n) {
+                best = bigger(best, rightAll);
+            }
+            else {
+                best = bigger(best, rightBefore[after]);
+            }
+
+            bit2[y] = best;
+            y = y - lowbit(y);
+        }
+    }
+
+    bool sameBlocksAs(const FenwickMax& other) const {
+        return bit1 == other.bit1 && bit2 == other.bit2;
     }
 };
