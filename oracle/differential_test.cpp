@@ -2,6 +2,7 @@
 #include <iostream>
 #include <vector>
 #include <numeric>
+#include <fstream>
 
 #include "gcd_reference.hpp"
 #include "generator.hpp"
@@ -33,32 +34,47 @@ public:
     }
 };
 
+void saveFailure(
+    const vector<Value>& arr,
+    const vector<Operation>& operations,
+    int failedAt,
+    unsigned long long seed
+) {
+    ofstream file("failure.txt");
 
-class CorrectTree {
-private:
-    vector<Value> arr;
-
-public:
-    CorrectTree(vector<Value> a) {
-        arr = a;
+    if (!file) {
+        cerr << "Could not create failure.txt\n";
+        return;
     }
 
-    void assign(int index, Value value) {
-        arr[index] = value;
+    file << "Seed: " << seed << "\n";
+    file << "Array size: " << arr.size() << "\n";
+
+    file << "Initial array: ";
+    for (Value value : arr) {
+        file << value << " ";
     }
+    file << "\n";
 
-    Value query(int l, int r) {
-        Value answer = 0;
+    file << "Operations:\n";
 
-        for (int i = l; i < r; i++) {
-            answer = gcd(answer, arr[i]);
+    for (int i = 0; i <= failedAt; i++) {
+        Operation op = operations[i];
+
+        if (op.type == OpType::ASSIGN) {
+            file << "ASSIGN " << op.l
+                 << " " << op.value << "\n";
         }
-
-        return answer;
+        else if (op.type == OpType::QUERY_GCD) {
+            file << "QUERY_GCD " << op.l
+                 << " " << op.r << "\n";
+        }
+        else {
+            file << "QUERY_MAX " << op.l
+                 << " " << op.r << "\n";
+        }
     }
-};
-
-
+}
 
 int main() {
     int n = 100;
@@ -68,13 +84,13 @@ int main() {
     vector<Value> arr(n, 10);
 
     GcdReference oracle(arr);
-    CorrectTree tree(arr);
+    BuggyTree tree(arr);
 
     vector<Operation> operations =
         generateOperations(n, totalOps, seed);
 
     int queriesChecked = 0;
-    int failures = 0;
+    int failedAt = -1;
 
     for (int i = 0; i < totalOps; i++) {
         Operation op = operations[i];
@@ -83,7 +99,6 @@ int main() {
             oracle.assign(op.l, op.value);
             tree.assign(op.l, op.value);
         }
-
         else if (op.type == OpType::QUERY_GCD) {
             Value expected = oracle.query(op.l, op.r + 1);
             Value actual = tree.query(op.l, op.r + 1);
@@ -91,28 +106,29 @@ int main() {
             queriesChecked++;
 
             if (expected != actual) {
-                failures++;
+                failedAt = i;
 
-                if (failures == 1) {
-                    cout << "First mismatch at operation: "
-                         << i << "\n";
-                    cout << "Expected: " << expected << "\n";
-                    cout << "Actual: " << actual << "\n";
-                }
+                cout << "Mismatch at operation: "
+                     << i << "\n";
+                cout << "Expected: " << expected << "\n";
+                cout << "Actual: " << actual << "\n";
+
+                saveFailure(arr, operations, i, seed);
+                break;
             }
         }
     }
 
     cout << "Seed: " << seed << "\n";
-    cout << "Total operations: " << totalOps << "\n";
     cout << "GCD queries checked: " << queriesChecked << "\n";
-    cout << "Mismatches found: " << failures << "\n";
 
-    if (failures == 0) {
-        cout << "SUCCESS: Correct implementation passed!\n";
-    } else {
-        cout << "FAIL: Correct implementation produced mismatches!\n";
+    if (failedAt != -1) {
+        cout << "Failure saved to failure.txt\n";
+        cout << "SUCCESS: Bug detected!\n";
+    }
+    else {
+        cout << "No mismatches found.\n";
     }
 
-    return failures == 0 ? 0 : 1;
+    return failedAt != -1 ? 0 : 1;
 }
