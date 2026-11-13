@@ -1,0 +1,10 @@
+
+# Windows compiled executables
+*.exe
+
+# C++ object files
+*.o
+*.obj
+
+# Build folders
+build/
