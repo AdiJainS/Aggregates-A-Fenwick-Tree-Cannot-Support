@@ -58,3 +58,32 @@ inline Workload makeQueryWorkload(int n, int queryCount) {
 
     return workload;
 }
+
+// Repeatedly decrease a unique maximum at index 0.
+// Each decrease is followed by a whole-array query.
+inline Workload makeDecreaseWorkload(int n, int decreases) {
+    if (n < 4 || (n & (n - 1)) != 0 || decreases < 1) {
+        throw std::invalid_argument(
+            "Require power-of-two n >= 4 and decreases >= 1"
+        );
+    }
+
+    Workload workload;
+
+    workload.initial.assign(n, 0);
+    workload.initial[0] = static_cast<long long>(decreases) + 1;
+
+    for (int i = 0; i < decreases; i++) {
+        long long value = static_cast<long long>(decreases) - i;
+
+        workload.operations.push_back({
+            OpType::ASSIGN, 0, 0, value
+        });
+
+        workload.operations.push_back({
+            OpType::QUERY_MAX, 0, n - 1, 0
+        });
+    }
+
+    return workload;
+}
