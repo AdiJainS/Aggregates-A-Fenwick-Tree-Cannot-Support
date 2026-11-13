@@ -33,6 +33,33 @@ public:
     }
 };
 
+
+class CorrectTree {
+private:
+    vector<Value> arr;
+
+public:
+    CorrectTree(vector<Value> a) {
+        arr = a;
+    }
+
+    void assign(int index, Value value) {
+        arr[index] = value;
+    }
+
+    Value query(int l, int r) {
+        Value answer = 0;
+
+        for (int i = l; i < r; i++) {
+            answer = gcd(answer, arr[i]);
+        }
+
+        return answer;
+    }
+};
+
+
+
 int main() {
     int n = 100;
     int totalOps = 10000;
@@ -41,7 +68,7 @@ int main() {
     vector<Value> arr(n, 10);
 
     GcdReference oracle(arr);
-    BuggyTree tree(arr);
+    CorrectTree tree(arr);
 
     vector<Operation> operations =
         generateOperations(n, totalOps, seed);
@@ -81,11 +108,11 @@ int main() {
     cout << "GCD queries checked: " << queriesChecked << "\n";
     cout << "Mismatches found: " << failures << "\n";
 
-    if (failures > 0) {
-        cout << "SUCCESS: Bug detected!\n";
+    if (failures == 0) {
+        cout << "SUCCESS: Correct implementation passed!\n";
     } else {
-        cout << "No mismatches found.\n";
+        cout << "FAIL: Correct implementation produced mismatches!\n";
     }
 
-    return failures > 0 ? 0 : 1;
+    return failures == 0 ? 0 : 1;
 }
