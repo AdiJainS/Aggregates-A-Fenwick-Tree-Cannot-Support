@@ -1,6 +1,6 @@
 # Planning
 
-This is the model I plan to test for the sensor-array project. It describes the work done by each structure, rather than claiming a fixed number of nanoseconds per operation. The constants will depend on the implementation and machine. I will keep this draft as the pre-measurement record and put the measured comparison in `REPORT.md` later.
+This draft predicts the work needed by each structure. The constants depend on the implementation and machine. The measurements and comparison will go in `REPORT.md`.
 
 ## Workload and notation
 
@@ -28,7 +28,7 @@ For the plain-array oracle, total range-query work is proportional to the sum of
 
 ## Total-work equations
 
-The table gives per-operation bounds. For a mixed replay, I will use the following totals as the starting model. The `c` terms are implementation-dependent costs per counted step; I will not assign them values from the benchmark results and then present them as predictions.
+The table gives per-operation bounds. For a mixed replay, the following equations model total work. The `c` terms are implementation-dependent costs per step.
 
 For the segment tree's maximum/count operations, let `Lq` be the total number of nodes visited by all maximum queries and `Lu` the total nodes visited by all point assignments. A first model is
 
@@ -44,7 +44,7 @@ For the two-tree Fenwick structure, let `R` be the number of cached intervals re
 
 `Tbit = bbit*n + cq*sum(log2(w_i + 1)) + cu*(U+ + U-)L + cr*R`.
 
-The theoretical update bound is amortised `O(log n)` per assignment. `R` is included to test whether decreases that invalidate cached maxima explain a larger constant. It is a counter to inspect, not a second asymptotic claim. Fenwick's original structure decomposes cumulative frequencies according to the binary representation of an index [2]. Dima and Ceterchi adapt two directional trees for range minimum queries and arbitrary assignments; using maximum requires reversing the comparison throughout [3]. In their experiment, the Fenwick version was faster than their segment tree on the tested minimum-query workload, but the result comes from their input sizes, implementation, and 2015 machine. I will treat it as motivation to test the design, not as a promised speedup for our max/count application [3].
+The update bound is amortised `O(log n)` per assignment. The `R` counter tracks cached intervals recomputed after an update. Fenwick's original structure stores cumulative frequencies using the binary representation of an index [2]. Dima and Ceterchi use two directional trees for range minimum queries and arbitrary assignments; maximum requires reversing the comparison [3]. Their Fenwick implementation was faster on their tested workload, but our results will depend on our implementation and machine.
 
 For the prefix-only maximum baseline, let `Qprefix` count valid prefix queries. If each decrease triggers a rebuild, then
 
@@ -65,7 +65,7 @@ These equations predict the scale and workload trends, not exact elapsed seconds
 - Segment-tree maximum and two-tree Fenwick maximum have the same logarithmic worst-case scale for general ranges. I cannot justify a numeric crossover before seeing their constants. I will test whether the two-tree query's shorter paths on narrow ranges outweigh its update work. A full-range segment-tree query may favour the segment tree.
 - Repeated equal maxima need their own max/count checks. A scalar prefix-maximum baseline has no count result, so it cannot be included in a max/count timing comparison without a separately specified extension.
 
-These are predictions, not results. I will not fit the predictions to benchmark data and then call them pre-measurement predictions.
+These predictions were written before measurement.
 
 ## Workloads and measurement plan
 
@@ -77,7 +77,7 @@ Every implementation will receive the same operations and initial values. I will
 
 For each implementation I will record elapsed time and the operation counters that explain it: segment-tree nodes visited and combines, Fenwick nodes visited and interval recomputations, and array elements scanned. Counter collection will run separately if it changes timing. The report will name the processor, cache sizes, compiler and flags, operating system, and profiler used for any cache claim. These controls follow the project's requirement to state the machine, record seeds, and report spread.
 
-Before benchmarking, D2 and D3 need to settle which interface supplies maximum counts and gcd when the application selects Structure B. The project description names Structure B as a range-maximum structure; I will not silently claim it supports the other outputs. Any additional method the team agrees to implement should be added to the table and given its own cost term before it is measured.
+Before benchmarking, D2 and D3 need to settle which interface supplies maximum counts and gcd when the application selects Structure B. The brief specifies range maximum for B. Add any agreed extension to the model before measuring it.
 
 ## References
 

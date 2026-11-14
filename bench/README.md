@@ -1,6 +1,6 @@
 # GCD benchmark
 
-This first harness replays the same seeded GCD queries and point assignments against D3's segment tree and D4's array oracle. D4's `oracle/gcd_reference.hpp` is included directly. D3's source is still on a separate branch; `gcd_benchmark.cpp` temporarily renames its example `main` when including the class. Replace this adapter when D3 exposes a header.
+The benchmark runs the same GCD queries and point updates on D3's segment tree and D4's array oracle. It includes `oracle/gcd_reference.hpp` directly. D3's code is on a separate branch, and the benchmark temporarily renames its example `main`. Replace that adapter when D3 provides a header.
 
 From the repository root, extract D3's file into a temporary directory (PowerShell). Use a C++17 compiler with a standard library that implements `std::gcd` (GCC 7 or newer):
 
@@ -19,7 +19,7 @@ New-Item -ItemType Directory -Force results | Out-Null
 
 Arguments are array size, operation count, fixed query width, update percentage, seed, repetitions, and mode. `check` compares every query with `GcdReference` before timing both structures. `tree` and `oracle` time just the chosen structure, useful when a wide-range oracle run takes too long. GCD benchmark ranges are zero-indexed and half-open. D4's separate general `Oracle` and its generator use inclusive right endpoints; an adapter must convert those endpoints before using them with this benchmark. Values are non-negative integers from 0 to 1,000,000. The seed identifies the workload for a given build and standard library; save compiler details too.
 
-CSV contains one row per run, with build and mixed-replay time in milliseconds, actual query/update counts, and a query-result checksum. Compute the mean and spread across the five rows for each configuration. Replay time includes dispatch and checksum work; it is not separate per-query and per-update latency. Workload generation and correctness checks are outside the timed region.
+The CSV has one row per run, with build time, replay time, query and update counts, and a checksum. Replay time includes dispatch and checksum work. Workload generation and correctness checks are outside the timed region.
 
 After collecting raw CSV files for several widths, summarize and plot them (plotting requires `matplotlib`):
 
@@ -28,6 +28,6 @@ python bench/summarize.py results/gcd-width-1.csv results/gcd-width-64.csv > res
 python bench/plot_width.py results/gcd-summary.csv results/gcd-width.png --n 1000 --operations 10000 --update-percent 20 --seed 253
 ```
 
-The summary groups runs by structure, workload parameters and seed. Spread is the sample standard deviation; min and max are included as well. With one run, standard deviation is left blank; the assignment requires at least five runs. The plot shows mixed replay time with standard deviation bars; it does not show individual query latency. Do not combine results from different machines or compiler settings in one summary. Keep the raw CSV files and machine details alongside the figures.
+The summary groups runs by structure, workload and seed. It reports the mean, sample standard deviation, minimum and maximum. Standard deviation is blank for a single run; the assignment requires at least five. The graph shows mixed replay time with standard deviation bars. Keep raw CSVs and machine details with the figures, and don't combine runs from different machines or compiler settings.
 
 The full assignment requires at least one million elements and one million operations. Start with manageable checks, then use `tree` mode for expensive wide ranges. Record any skipped oracle configurations. The harness does not yet measure operation counters, cache behaviour, or maximum queries; those are later D6 work.

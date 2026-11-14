@@ -26,7 +26,10 @@ def main():
             raise ValueError(f"inconsistent checksums for {key}")
         build = [float(row["build_ms"]) for row in rows]
         replay = [float(row["replay_ms"]) for row in rows]
-        sd = lambda values: f"{statistics.stdev(values):.6f}" if len(values) > 1 else ""
+        def sd(values):
+            if len(values) < 2:
+                return ""
+            return f"{statistics.stdev(values):.6f}"
         writer.writerow((*key, len(rows), f"{statistics.mean(build):.6f}",
                          sd(build), f"{statistics.mean(replay):.6f}",
                          sd(replay), f"{min(replay):.6f}", f"{max(replay):.6f}"))

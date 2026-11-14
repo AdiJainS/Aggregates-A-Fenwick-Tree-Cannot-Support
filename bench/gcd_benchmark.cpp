@@ -25,7 +25,7 @@ struct Workload {
     std::vector<Operation> operations;
 };
 
-// Generate once, then replay exactly the same operations for each structure.
+// Both structures use the same operations.
 Workload generate(int n, int count, int width, int update_percent, std::uint64_t seed) {
     std::mt19937_64 rng(seed);
     std::uniform_int_distribution<Value> value(0, 1000000);
