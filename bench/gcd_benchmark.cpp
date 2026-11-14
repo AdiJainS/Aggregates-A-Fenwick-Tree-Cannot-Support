@@ -2,7 +2,7 @@
 #define main d3_example_main
 #include "gcd_segment_tree.cpp"
 #undef main
-#include "gcd_reference.hpp"
+#include "../oracle/gcd_reference.hpp"
 
 #include <chrono>
 #include <cstdint>

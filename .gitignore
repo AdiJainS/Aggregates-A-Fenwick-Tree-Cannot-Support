@@ -1,1 +1,6 @@
 /.bench-deps/
+*.exe
+*.o
+*.obj
+build/
+/failure.txt
