@@ -147,3 +147,68 @@ Timing experiments and figures belong to D6's benchmark harness.
 
 Full-scale replay and integration with the team's correctness
 and measurement harnesses remain to be completed.
+
+
+## Using these workloads in team tools
+
+Include:
+
+    #include "../adversary/generators.hpp"
+
+Adjust the relative include path if necessary.
+
+Each generator returns a Workload containing:
+
+- initial: the initial array of long long values.
+- operations: a vector of the shared Operation type.
+
+Indices are zero-based and query endpoints are inclusive.
+
+Available generators:
+
+    makeRebuildWorkload(n, k)
+    makeQueryWorkload(n, queryCount)
+    makeDecreaseWorkload(n, decreases)
+
+Operation counts:
+
+- Rebuild workload: 2*k operations.
+- Query workload: queryCount operations.
+- Decrease workload: 2*decreases operations.
+
+The query and decrease generators require power-of-two n >= 4.
+The rebuild generator requires 1 <= k <= n.
+
+All workloads are deterministic; no random seed is used.
+
+### D4: correctness testing
+
+Replay the initial array and operations through the existing
+correctness harness.
+
+Use manageable sizes for direct-array checks. The generated
+operations use inclusive query endpoints; convert endpoints when
+calling a structure with half-open ranges.
+
+### D6: measurement
+
+Use identical initial arrays and operations for each supported
+comparison. Workload generation should be outside the timed region.
+
+The prefix baseline supports prefix queries only. All queries in
+the rebuild workload start at zero, so they are valid prefix queries.
+
+The query and decrease workloads target the current two-tree
+Fenwick implementation. See ANALYSIS.md for the constructions
+and expected counters.
+
+Full-scale correctness and counter results are recorded in:
+
+    results/d5-queries-scale.txt
+    results/d5-decreases-scale.txt
+
+These logs are not timing measurements. The rebuilding prefix
+baseline was not replayed at million-decrease scale.
+
+Timing repetitions, machine details, figures and predicted-versus-
+measured comparisons belong to the Analyst's benchmark work.
