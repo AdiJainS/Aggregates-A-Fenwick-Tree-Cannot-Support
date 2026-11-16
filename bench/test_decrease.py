@@ -28,6 +28,14 @@ def main():
     for percent in ("-1", "101"):
         result = subprocess.run(base + ["check", percent], capture_output=True, text=True)
         assert result.returncode != 0
+    checksums = []
+    for mode in ("time-a", "time-b"):
+        result = subprocess.run(base + [mode, "50"], check=True, capture_output=True, text=True)
+        rows = list(csv.DictReader(io.StringIO(result.stdout)))
+        assert len(rows) == 2
+        assert len({row["structure"] for row in rows}) == 1
+        checksums.append(rows[0]["checksum"])
+    assert checksums[0] == checksums[1]
     print("Decrease workload checks passed")
 
 

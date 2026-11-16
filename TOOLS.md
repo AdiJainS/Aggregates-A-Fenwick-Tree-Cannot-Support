@@ -9,5 +9,7 @@
 | Codex (OpenAI), ReportLab | D6 draft PDF and report | Generated the draft derivation from the cost model and summarized the measured CSVs. The report identifies the provisional D1 snapshot and measurement limits. Adi needs to review the derivation and analysis. |
 | Codex (OpenAI) | D5 scale benchmark | Added checks for the two deterministic scale workloads, ran five timing repetitions and compared B's counters with D5's documented totals. |
 | Codex (OpenAI) | Random update workloads | Added a decrease-percentage option and actual update counts to the benchmark and summary scripts. Adi should review the generator and its output before using it for the final results. |
+| Codex (OpenAI), Windows Performance Recorder | Decrease sweep, profiling setup and presentation draft | Ran the seeded workloads, summarized and plotted results, prepared a slide and viva notes, and attempted a WPR cache trace. WPR did not start without the required privilege. Adi should review the analysis and rerun with the team's final code. |
+| Codex (OpenAI) | GCD counter mode | Added a separate instrumented build for GCD block visits and Euclidean remainder steps. Adi should review the counter definitions before presenting them. |
 
 Add each teammate's tools and their edits here as their work is merged.

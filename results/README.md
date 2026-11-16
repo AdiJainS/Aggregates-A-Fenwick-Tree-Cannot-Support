@@ -15,8 +15,14 @@ Recorded on 16 November 2026. These are preliminary results for the snapshots li
 
 `gcd-n*.csv`, `gcd-summary.csv` and `gcd-width-u*.png` use the same sizes, seed, widths and update shares. Width 1 was checked and timed against the array oracle; the two wider GCD cases measured the tree only. The array oracle is omitted at those widths because scanning every range would be costly.
 
+`gcd-counts/` contains separate instrumented replays for those nine GCD workloads. The GCD checksums match the original timing CSVs. Counters exclude construction; the hypothetical oracle scan count is calculated from query widths rather than measured by running the oracle.
+
 `counts-n*.csv` files contain separate instrumented runs of the random workloads, using the size, width, update percentage and seed in each filename. Prefix counters are omitted from random runs; the D5 files include them for prefix workloads. B's `assignBlocks` includes its preparatory and update steps; A's update counter counts visits, so the two counts describe different operations.
 
 The later `results/d5-scale/` files use D5's workload analysis from `5085c20`; the generators did not change since `c754134`. Each case has 1,048,576 elements and one million operations. `query` has one million difficult queries; `decrease` has 500,000 decreases, each followed by a query. The files include five-run timing data, separate counters and result checks against the expected values of these deterministic workloads. They were run on the same machine and compiler listed above. The prefix baseline was not run at this size. These results still depend on the earlier, unconfirmed D1 snapshot.
 
 A and B returned matching checksums in all full-scale timing runs. Separate small checks compared each query with D4's oracle, including A's maximum count. Checksums do not prove correctness on all possible inputs. The full-scale timing runs did not replay the array oracle because it scans each queried range. No cache profiler output has been collected.
+
+`decrease-sweep/` contains the later random workloads with 0%, 50% and 100% requested decreases among updates. The full-scale files use the same machine, compiler, seed, sizes, widths and update mixes described above; five runs per structure are recorded for each of the 27 configurations. Every chosen update changes its current value by one. `prefix/` contains a separate `n=4096`, 10,000-operation full-prefix comparison; each query was checked against the oracle before timing. Summaries and plots are in the same directory.
+
+`cache/` records available WPR counters and a failed attempt to start a cache trace without the required privilege. It also contains commands for collecting separate A and B traces. There is no cache-miss result yet.

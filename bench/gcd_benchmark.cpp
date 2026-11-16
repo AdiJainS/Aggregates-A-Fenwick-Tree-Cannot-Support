@@ -57,6 +57,29 @@ void check(const Workload& w) {
     }
 }
 
+void countOperations(const Workload& w, int width, int update_percent, std::uint64_t seed) {
+    structA::GcdSegmentTree tree(w.initial);
+    tree.resetCounters();
+    std::uint64_t checksum = 0;
+    std::uint64_t queries = 0, updates = 0, oracle_elements = 0;
+    for (const auto& op : w.operations) {
+        if (op.update) {
+            tree.assign(op.l, op.value);
+            updates++;
+        } else {
+            checksum = checksum * 1315423911ULL + tree.query(op.l, op.r);
+            oracle_elements += op.r - op.l;
+            queries++;
+        }
+    }
+    auto counts = tree.counters();
+    std::cout << "n,operations,width,update_percent,seed,queries,updates,query_blocks,query_merges,update_visits,update_merges,euclid_remainders,oracle_elements_if_scanned,checksum\n";
+    std::cout << w.initial.size() << ',' << w.operations.size() << ',' << width << ',' << update_percent << ','
+              << seed << ',' << queries << ',' << updates << ',' << counts.queryBlocks << ',' << counts.queryMerges << ','
+              << counts.updateVisits << ',' << counts.updateMerges << ',' << tree.euclidRemainderSteps() << ','
+              << oracle_elements << ',' << checksum << '\n';
+}
+
 using Clock = std::chrono::steady_clock;
 
 template<class Structure>
@@ -88,7 +111,7 @@ void measure(const char* name, const Workload& w, int width, int update_percent,
 int main(int argc, char** argv) {
     if (argc != 8) {
         std::cerr << "Usage: gcd_benchmark N OPERATIONS WIDTH UPDATE_PERCENT SEED RUNS MODE\n"
-                     "MODE: check (both and verify), tree, or oracle\n";
+                     "MODE: check (both and verify), tree, oracle, or counts\n";
         return 1;
     }
     try {
@@ -98,9 +121,20 @@ int main(int argc, char** argv) {
         int runs = std::stoi(argv[6]);
         std::string mode = argv[7];
         if (n < 1 || count < 1 || width < 1 || width > n || update_percent < 0 ||
-            update_percent > 100 || runs < 1 || (mode != "check" && mode != "tree" && mode != "oracle"))
+            update_percent > 100 || runs < 1 || (mode != "check" && mode != "tree" && mode != "oracle" && mode != "counts"))
             throw std::invalid_argument("invalid workload parameters or mode");
         Workload workload = generate(n, count, width, update_percent, seed);
+        if (mode == "counts") {
+#ifndef STRUCTA_ENABLE_COUNTERS
+            throw std::invalid_argument("Compile with -DSTRUCTA_ENABLE_COUNTERS for counts");
+#else
+            countOperations(workload, width, update_percent, seed);
+            return 0;
+#endif
+        }
+#ifdef STRUCTA_ENABLE_COUNTERS
+        throw std::invalid_argument("Compile without STRUCTA_ENABLE_COUNTERS for timing");
+#endif
         if (mode == "check") check(workload);
         std::cout << "structure,n,operations,width,update_percent,seed,run,queries,updates,build_ms,replay_ms,checksum\n";
         for (int run = 1; run <= runs; ++run) {

@@ -34,9 +34,9 @@ For the segment tree's maximum/count operations, let `Lq` be the total number of
 
 `Tseg,max = bseg*n + ccombine*Lq + cupdate*Lu`.
 
-The worst-case estimate substitutes `Lq = O(Qmax L)` and `Lu = O((U+ + U-)L)`. I will log the actual node counts too, since an aligned full-array query may be answered at the root. For gcd, let `Gq` and `Gu` be the total number of Euclidean remainder steps performed while answering queries and applying updates. Then
+The worst-case estimate substitutes `Lq = O(Qmax L)` and `Lu = O((U+ + U-)L)`. The current A counters distinguish selected query blocks from update visits; selected blocks are not a count of every loop iteration. For gcd, let `Lq,gcd` and `Lu,gcd` count query and update visits, and let `Gbuild`, `Gq` and `Gu` count Euclidean remainder steps during construction, queries and updates. Then
 
-`Tseg,gcd = bgcd*n + cvisit*Lq,gcd + cgcd*(Gq + Gu)`.
+`Tseg,gcd = bgcd*n + cvisit*(Lq,gcd + Lu,gcd) + cgcd*(Gbuild + Gq + Gu)`.
 
 For each query, the direct bound is `O(log n log V)` remainder steps. The telescoping bound required by D3 reduces the total query arithmetic to `O(log n + log V)`; the final write-up should show the conditions under which the sequence of gcds telescopes. Updates are reported separately because D3's stated bound is for a query.
 
@@ -44,7 +44,7 @@ For the two-tree Fenwick structure, let `R` be the number of cached intervals re
 
 `Tbit = bbit*n*L + cq*sum(log2(w_i + 1)) + cu*(U+ + U-)L + cr*R`.
 
-The update bound is amortised `O(log n)` per assignment. The `R` counter tracks cached intervals recomputed after an update. Fenwick's original structure stores cumulative frequencies using the binary representation of an index [2]. Dima and Ceterchi use two directional trees for range minimum queries and arbitrary assignments; maximum requires reversing the comparison [3]. Their Fenwick implementation was faster on their tested workload, but our results will depend on our implementation and machine.
+The update bound is amortised `O(log n)` per assignment. D2 reports `assignBlocks`, `changedBlocks` and `loweredBlocks`; the latter two count blocks whose stored values changed or fell, not every recomputation. When fitting or comparing a model, avoid counting the same work twice in both the base update term and `R`. Fenwick's original structure stores cumulative frequencies using the binary representation of an index [2]. Dima and Ceterchi use two directional trees for range minimum queries and arbitrary assignments; maximum requires reversing the comparison [3]. Their Fenwick implementation was faster on their tested workload, but our results will depend on our implementation and machine.
 
 For the prefix-only maximum baseline, let `Qprefix` count valid prefix queries. If each decrease triggers a rebuild, then
 

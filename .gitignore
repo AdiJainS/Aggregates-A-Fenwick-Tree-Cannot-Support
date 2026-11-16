@@ -4,3 +4,5 @@
 *.obj
 build/
 /failure.txt
+/results/cache/*.etl
+__pycache__/

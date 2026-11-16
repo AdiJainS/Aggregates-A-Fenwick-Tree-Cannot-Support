@@ -184,7 +184,7 @@ void checkAdversarial(const Workload& w, const std::string& kind) {
 int main(int argc, char** argv) {
     if (argc != 9 && argc != 10) {
         std::cerr << "Usage: max_benchmark N OPERATIONS WIDTH UPDATE_PERCENT SEED RUNS WORKLOAD MODE [DECREASE_PERCENT]\n"
-                     "WORKLOAD: random, rebuild, decrease, query; MODE: check, check-scale, time, prefix, counts, counts-ab\n";
+                     "WORKLOAD: random, rebuild, decrease, query; MODE: check, check-scale, time, time-a, time-b, prefix, counts, counts-ab\n";
         return 1;
     }
     try {
@@ -216,17 +216,22 @@ int main(int argc, char** argv) {
 #else
             counters(w, mode == "counts" && kind != "random", decreasePercent, updateCounts);
 #endif
-        } else if (mode == "time" || mode == "prefix") {
+        } else if (mode == "time" || mode == "time-a" || mode == "time-b" || mode == "prefix") {
 #ifdef STRUCTA_ENABLE_COUNTERS
             throw std::invalid_argument("Compile without STRUCTA_ENABLE_COUNTERS for timing");
 #endif
             if (mode == "prefix" && !prefixOnly(w)) throw std::invalid_argument("Prefix mode requires prefix queries");
             std::cout << "structure,n,operations,width,update_percent,seed,run,queries,updates,build_ms,replay_ms,checksum,workload,decrease_percent,actual_increases,actual_decreases,actual_unchanged\n";
             for (int run = 1; run <= runs; ++run) {
-                if (mode == "time") {
+                if (mode == "time" || mode == "time-a") {
                     timed<MaxTree>("segment_tree", w, kind, width, updatePercent, seed, run, decreasePercent, updateCounts);
+                }
+                if (mode == "time" || mode == "time-b") {
                     timed<FenwickMax>("fenwick", w, kind, width, updatePercent, seed, run, decreasePercent, updateCounts);
-                } else timed<Prefix>("prefix_fenwick", w, kind, width, updatePercent, seed, run, decreasePercent, updateCounts);
+                }
+                if (mode == "prefix") {
+                    timed<Prefix>("prefix_fenwick", w, kind, width, updatePercent, seed, run, decreasePercent, updateCounts);
+                }
             }
         } else throw std::invalid_argument("Unknown mode");
     } catch (const std::exception& e) { std::cerr << "Error: " << e.what() << '\n'; return 1; }

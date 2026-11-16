@@ -24,6 +24,22 @@ For width 1024 at 10% updates, the Fenwick version was faster on this workload. 
 
 The D2 constructor scans the blocks it builds. Its total scanned length has an `O(n log n)` upper bound, whereas the Dima-Ceterchi paper describes a linear build. The timings measure this implementation, not a linear-build implementation. A's maximum-only tree is used so its updates do not also recompute GCD. B's counters are always enabled, while A's counters are disabled in timing runs. This difference can affect the comparison and needs attention before making a final claim.
 
+## Varying decreases
+
+The newer generator changes a selected value by one on every update. It chooses whether to increase or decrease according to the requested percentage. At `n=1000000`, width 1024 and 50% updates, the mean mixed replay times in milliseconds were:
+
+| Decreases among updates | Segment tree | Two-tree Fenwick |
+| ---: | ---: | ---: |
+| 0% | 250.19 | 375.10 |
+| 50% | 252.36 | 380.84 |
+| 100% | 269.54 | 384.90 |
+
+These are five-run means for seed 253, not isolated per-update times. The corresponding standard deviations and actual update counts are in `results/decrease-sweep/summary.csv`. The A/B comparison remains provisional because of the D1 revision and B's active counters. These cases change values by one; results may differ for larger changes or other value distributions.
+
+For the prefix-only workload at `n=4096`, 10,000 operations and 50% updates, the prefix baseline's mean replay time was 0.21 ms, 13.80 ms and 27.69 ms at 0%, 50% and 100% requested decreases. The actual decrease counts were 0, 2532 and 5051. Since this baseline rebuilds after each decrease, the rise is consistent with the model. Each of the three curves used the same seed and five runs; D4's oracle checked the queries on these cases. The full CSV and sample standard deviations are in `results/decrease-sweep/prefix-summary.csv`.
+
+![Prefix timings as decreases increase](results/decrease-sweep/prefix-decreases.png)
+
 ## D5 workloads
 
 At `n=4096`, the repeated-rebuild workload used 1024 decreases and 1024 queries. The prefix baseline recorded 1024 rebuilds. Its mean replay time was 5.98 ms, versus 0.085 ms for the two-tree Fenwick and 0.127 ms for the segment tree. The separate decrease workload also recorded 1024 prefix rebuilds. These timings cover the specified small deterministic workloads; they are not million-element measurements.
@@ -34,4 +50,8 @@ The updated D5 branch also specifies scale cases at `n=1048576`. For one million
 
 For the difficult-query case, B recorded 39,000,000 query blocks. For repeated decreases, it recorded 10,500,000 query blocks, 21,000,000 assignment steps and 11,000,000 lowered blocks. These totals match D5's analysis of this implementation. Every query result was checked against the known answer of the corresponding deterministic generator. The prefix baseline was not run at this size. B's counters were enabled during timing, so the timing comparison has the limitation described above.
 
-Random maximum checks and the three D5 generators were checked against D4's oracle at small sizes. Full-scale A/B timing checksums matched, but checksums do not replace the oracle. The GCD tree was also measured at full scale across the same widths and mixes. For width 1, its answers were checked against D4's oracle; wider GCD runs measured only the tree. No cache profiler results have been collected. Repeat the comparison against the final team code.
+Random maximum checks and the three D5 generators were checked against D4's oracle at small sizes. Full-scale A/B timing checksums matched, but checksums do not replace the oracle. The GCD tree was also measured at full scale across the same widths and mixes. For width 1, its answers were checked against D4's oracle; wider GCD runs measured only the tree.
+
+In a separate GCD counter run at width 1024 and 50% updates, the tree selected 4,996,370 query blocks and performed 21,055,611 Euclidean remainder steps across the replay. The count excludes construction. Scanning those same query ranges with the array oracle would visit 511,597,568 elements; that figure is calculated from their widths, not a timed oracle run. The counters and definitions are in `results/gcd-counts/` and `bench/README.md`.
+
+An attempt to record cache events with WPR failed because the session lacked a required privilege. No cache profiler results have been collected; the setup and error are in `results/cache/`. Repeat the comparison against the final team code.
