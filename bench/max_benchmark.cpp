@@ -128,10 +128,29 @@ void counters(const Workload& w, bool includePrefix) {
     if (usePrefix) std::cout << "prefix_fenwick," << p.queryBlocks() << ',' << p.raiseSteps() << ",,," << p.rebuilds() << '\n';
 }
 
+void checkAdversarial(const Workload& w, const std::string& kind) {
+    MaxTree a(w.initial);
+    FenwickMax b(w.initial);
+    long long expected = static_cast<long long>(w.initial.size()) - 1;
+    for (std::size_t i = 0; i < w.operations.size(); ++i) {
+        const auto& op = w.operations[i];
+        if (op.type == OpType::ASSIGN) {
+            a.assign(op.l, op.value);
+            b.assign(op.l, op.value);
+            expected = op.value;
+        } else if (op.type == OpType::QUERY_MAX) {
+            auto result = a.queryMaxCount(op.l, op.r);
+            if (result.maximum != expected || result.count != 1 || b.queryMax(op.l, op.r) != expected)
+                throw std::runtime_error("Mismatch at operation " + std::to_string(i));
+        }
+    }
+    std::cout << "All " << w.operations.size() << " operations checked for " << kind << '\n';
+}
+
 int main(int argc, char** argv) {
     if (argc != 9) {
         std::cerr << "Usage: max_benchmark N OPERATIONS WIDTH UPDATE_PERCENT SEED RUNS WORKLOAD MODE\n"
-                     "WORKLOAD: random, rebuild, decrease, query; MODE: check, time, prefix, counts\n";
+                     "WORKLOAD: random, rebuild, decrease, query; MODE: check, check-scale, time, prefix, counts, counts-ab\n";
         return 1;
     }
     try {
@@ -149,11 +168,14 @@ int main(int argc, char** argv) {
         else throw std::invalid_argument("Unknown workload");
         if (kind != "random") { width = -1; updatePercent = -1; seed = 0; }
         if (mode == "check") { check(w); std::cout << "All maximum queries matched the oracle\n"; }
-        else if (mode == "counts") {
+        else if (mode == "check-scale") {
+            if (kind != "query" && kind != "decrease") throw std::invalid_argument("check-scale requires query or decrease workload");
+            checkAdversarial(w, kind);
+        } else if (mode == "counts" || mode == "counts-ab") {
 #ifndef STRUCTA_ENABLE_COUNTERS
             throw std::invalid_argument("Compile with -DSTRUCTA_ENABLE_COUNTERS for counts");
 #else
-            counters(w, kind != "random");
+            counters(w, mode == "counts" && kind != "random");
 #endif
         } else if (mode == "time" || mode == "prefix") {
 #ifdef STRUCTA_ENABLE_COUNTERS

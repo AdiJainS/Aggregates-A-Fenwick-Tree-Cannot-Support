@@ -23,6 +23,18 @@ Workloads are `random`, `rebuild`, `decrease` and `query`. The last three use D5
 
 `check` compares every maximum query with D4's oracle, including A's count. `time` measures the max-only A tree and B. `prefix` times the baseline separately; it rejects non-prefix queries. `counts` requires the counter build. B always updates its counters, including during timing; A's counters are disabled for timing. This is a limitation of the current B implementation.
 
+For D5's full-scale query and decrease cases, `check-scale` checks every result against the known expected maximum and count. `counts-ab` collects A and B counters without running the prefix baseline, whose repeated full rebuilds are too expensive at this size:
+
+```powershell
+.\.bench-deps\max_benchmark.exe 1048576 1000000 1 0 0 5 query check-scale
+.\.bench-deps\max_benchmark.exe 1048576 500000 1 0 0 5 decrease check-scale
+.\.bench-deps\max_benchmark.exe 1048576 500000 1 0 0 5 decrease time
+.\.bench-deps\max_counts.exe 1048576 500000 1 0 0 5 decrease counts-ab
+python bench/plot_d5.py results/d5-scale/summary.csv results/d5-scale/timings.png
+```
+
+The decrease generator creates one query after each assignment, so its parameter of 500,000 produces one million operations. `check-scale` is specific to these two D5 generators; the general `check` mode uses D4's array oracle and is best kept to manageable sizes.
+
 Run the full-scale random matrix with five repetitions:
 
 ```powershell
