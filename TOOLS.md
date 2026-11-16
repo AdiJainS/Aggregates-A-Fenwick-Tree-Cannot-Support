@@ -11,5 +11,3 @@
 | Windows Performance Recorder | Collected the cache profiling traces. |
 | Matplotlib (Python library) | Created benchmark graphs. |
 | Tracerpt | Exported the profiling traces for analysis. |
-
-Add each teammate's tools and their edits here as their work is merged.
