@@ -1,0 +1,20 @@
+# Benchmark results
+
+Recorded on 16 November 2026. These are preliminary results for the snapshots listed below. The D1 branch was reset after revision `905f6f28b03c0e3c0aa81089e84fe3ad5bb3bffd`; its owner must confirm the version used here. Do not treat the figures as final team results until the structures are agreed and rechecked.
+
+- D1: `905f6f28b03c0e3c0aa81089e84fe3ad5bb3bffd` (earlier snapshot, no longer at the branch tip).
+- D2: `e925e6f` from `feature/structB-d2`.
+- D4: `b7c1a10` from `feature/oracle-d4`.
+- D5: `c754134` from `d5`.
+- Computer: 13th Gen Intel Core i9-13900HX; reported L2 32768 KB, L3 36864 KB. Windows 11 Home Single Language, 64-bit, version 10.0.26300.
+- Compiler: Zig 0.13.0 `zig c++`, Clang 18.1.6, `-std=c++17 -O2`. A's counters were disabled in timing builds. B's counters run during timing.
+- Random seed 253; `n=1000000`, 1000000 operations, five runs each. Query widths 1, 1024, 1000000; update percentages 10, 50, 90. Each pair uses the same operations for both structures.
+- D5 CSVs use `n=4096`, generator parameter 1024 for decrease and rebuild workloads, and 2048 queries for the query workload. They are deterministic and have no random seed. Counter runs are separate from timing runs.
+
+`max-n*.csv` files are raw timings; `max-summary.csv` contains means, standard deviations and ranges. `max-width-u*.png` plots replay time against width. `d5-*-time.csv` contains A/B times, `d5-*-prefix.csv` contains baseline times and `d5-*-counts.csv` contains counter totals. The `-1` fields in D5 files mean that fixed random width and update-percentage settings do not apply.
+
+`gcd-n*.csv`, `gcd-summary.csv` and `gcd-width-u*.png` use the same sizes, seed, widths and update shares. Width 1 was checked and timed against the array oracle; the two wider GCD cases measured the tree only. The array oracle is omitted at those widths because scanning every range would be costly.
+
+`counts-n*.csv` files contain separate instrumented runs of the random workloads, using the size, width, update percentage and seed in each filename. Prefix counters are omitted from random runs; the D5 files include them for prefix workloads. B's `assignBlocks` includes its preparatory and update steps; A's update counter counts visits, so the two counts describe different operations.
+
+A and B returned matching checksums in all full-scale timing runs. Separate small checks compared each query with D4's oracle, including A's maximum count. Checksums do not prove correctness on all possible inputs. The full-scale timing runs did not replay the array oracle because it scans each queried range. No cache profiler output has been collected.

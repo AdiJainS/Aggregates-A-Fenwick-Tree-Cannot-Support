@@ -14,13 +14,13 @@ I will compare the same operation and the same generated input across implementa
 | --- | --- | --- | --- |
 | Segment tree, `(maximum, count)` | `O(n)` | Range maximum and its count: `O(log n)` | `O(log n)` |
 | Segment tree, gcd | `O(n)` | Range gcd: `O(log n)` visited nodes; target `O(log n + log V)` remainder steps with D3's telescoping argument | `O(log n)` visited nodes; conservatively `O(log n log V)` remainder steps |
-| Two-tree Fenwick maximum | `O(n)` | Arbitrary range maximum: `O(log(w + 1))` | `O(log n)` amortised, including decreases |
+| Two-tree Fenwick maximum | `O(n log n)` for the current D2 constructor | Arbitrary range maximum: `O(log(w + 1))` | `O(log n)` amortised, including decreases |
 | Prefix-only Fenwick maximum | `O(n)` | Prefix maximum: `O(log n)` | Increase: `O(log n)`; decrease: `O(n)` if rebuilt |
 | Plain array | `O(n)` to copy the input | Range maximum/count or gcd: `O(w)` aggregate steps | `O(1)` |
 
 The segment tree combines a bounded number of nodes on each level [4]. A full-array query can be cheaper than a typical range query because the root already stores its answer; the `O(log n)` line is a worst-case bound, not a promise that all widths cost the same. For max/count, each combine is constant work. For gcd, I will count both visited nodes and Euclidean remainder steps: counting each gcd as one unit would hide a value-dependent cost. The simple query bound is `O(log n log V)` remainder steps. D3 is responsible for the tighter `O(log n + log V)` bound; I will state the arithmetic model alongside that proof in the final version [5].
 
-The two-tree Fenwick query walks intervals from the two ends of the requested range. Dima and Ceterchi analyse this as logarithmic in the range length. Their paper presents **minimum**; reversing the comparison gives maximum. Their update method reuses partial results while climbing the trees, giving amortised `O(log n)` even for an assignment that invalidates a stored extremum [3]. Calling a fresh range query for every affected node would instead give an `O(log^2 n)` update and is not the implementation I am modelling. The number of invalidated cached maxima should matter to the constant factor, so I will record it rather than treating every decrease as equally costly.
+The two-tree Fenwick query walks intervals from the two ends of the requested range. Dima and Ceterchi analyse this as logarithmic in the range length. Their paper presents **minimum**; reversing the comparison gives maximum. Their update method reuses partial results while climbing the trees, giving amortised `O(log n)` even for an assignment that invalidates a stored extremum [3]. Calling a fresh range query for every affected node would instead give an `O(log^2 n)` update. The current D2 constructor scans each stored block: the total scanned length is `O(n log n)`, rather than the paper's linear build. I will measure build separately and record invalidated blocks on updates.
 
 The prefix-only baseline is deliberately limited. The increase-only update rule cannot repair a stored maximum after that maximum is lowered. For a correct baseline under arbitrary assignments, I will model rebuilding after each decrease. Its total work is therefore roughly proportional to `n(U- + 1) + L(Qprefix + U+)`, where `Qprefix` counts only valid prefix queries. A scan fallback for a non-prefix range would be a separate method with `O(w)` query work, not a Fenwick range query.
 
@@ -42,7 +42,7 @@ For each query, the direct bound is `O(log n log V)` remainder steps. The telesc
 
 For the two-tree Fenwick structure, let `R` be the number of cached intervals recomputed after assignments. The model is
 
-`Tbit = bbit*n + cq*sum(log2(w_i + 1)) + cu*(U+ + U-)L + cr*R`.
+`Tbit = bbit*n*L + cq*sum(log2(w_i + 1)) + cu*(U+ + U-)L + cr*R`.
 
 The update bound is amortised `O(log n)` per assignment. The `R` counter tracks cached intervals recomputed after an update. Fenwick's original structure stores cumulative frequencies using the binary representation of an index [2]. Dima and Ceterchi use two directional trees for range minimum queries and arbitrary assignments; maximum requires reversing the comparison [3]. Their Fenwick implementation was faster on their tested workload, but our results will depend on our implementation and machine.
 

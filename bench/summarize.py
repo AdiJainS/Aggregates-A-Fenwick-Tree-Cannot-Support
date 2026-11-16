@@ -11,11 +11,11 @@ def main():
     args = parser.parse_args()
 
     groups = defaultdict(list)
-    keys = ("structure", "n", "operations", "width", "update_percent", "seed")
+    keys = ("structure", "n", "operations", "width", "update_percent", "seed", "workload")
     for path in args.input:
         with open(path, newline="", encoding="utf-8-sig") as file:
             for row in csv.DictReader(file):
-                key = tuple(row[name] for name in keys)
+                key = tuple(row.get(name, "") for name in keys)
                 groups[key].append(row)
 
     writer = csv.writer(sys.stdout, lineterminator="\n")

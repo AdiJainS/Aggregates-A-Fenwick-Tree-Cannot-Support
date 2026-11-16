@@ -1,7 +1,4 @@
-// D3 currently ships its example main in the same file as the class.
-#define main d3_example_main
-#include "gcd_segment_tree.cpp"
-#undef main
+#include "../src/structA/structure_a.hpp"
 #include "../oracle/gcd_reference.hpp"
 
 #include <chrono>
@@ -25,7 +22,6 @@ struct Workload {
     std::vector<Operation> operations;
 };
 
-// Generate once so the tree and oracle receive identical operations.
 Workload generate(int n, int count, int width, int update_percent, std::uint64_t seed) {
     std::mt19937_64 rng(seed);
     std::uniform_int_distribution<Value> value(0, 1000000);
@@ -48,7 +44,7 @@ Workload generate(int n, int count, int width, int update_percent, std::uint64_t
 }
 
 void check(const Workload& w) {
-    GcdSegmentTree tree(w.initial);
+    structA::GcdSegmentTree tree(w.initial);
     GcdReference reference(w.initial);
     for (std::size_t i = 0; i < w.operations.size(); ++i) {
         const auto& op = w.operations[i];
@@ -108,7 +104,7 @@ int main(int argc, char** argv) {
         if (mode == "check") check(workload);
         std::cout << "structure,n,operations,width,update_percent,seed,run,queries,updates,build_ms,replay_ms,checksum\n";
         for (int run = 1; run <= runs; ++run) {
-            if (mode != "oracle") measure<GcdSegmentTree>("gcd_segment_tree", workload, width, update_percent, seed, run);
+            if (mode != "oracle") measure<structA::GcdSegmentTree>("gcd_segment_tree", workload, width, update_percent, seed, run);
             if (mode != "tree") measure<GcdReference>("gcd_array_oracle", workload, width, update_percent, seed, run);
         }
     } catch (const std::exception& e) {
