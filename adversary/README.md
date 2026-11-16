@@ -136,6 +136,26 @@ Run on Windows PowerShell:
 The query test exhaustively checks small arrays only.
 It must not be extended to million-element exhaustive testing.
 
+## Full-scale verification
+
+Compile from the repository root:
+
+```powershell
+g++ -std=c++17 -O2 adversary/run_scale.cpp -o adversary/run_scale.exe
+```
+
+Set `test = 1` for difficult queries or `test = 2` for repeated
+decreases. Save and recompile after changing the selector.
+
+Run:
+
+```powershell
+.\adversary\run_scale.exe
+```
+
+The expected totals apply to the fixed sizes in run_scale.cpp
+and the current D2 implementation.
+
 ## Reproducibility and measurements
 
 All three generators are deterministic and use no random seed.
@@ -145,9 +165,14 @@ saving experimental results.
 Counters measure implementation steps, not elapsed time.
 Timing experiments and figures belong to D6's benchmark harness.
 
-Full-scale replay and integration with the team's correctness
-and measurement harnesses remain to be completed.
+Full-scale correctness and counter verification passed for both
+two-tree workloads at 1,048,576 elements and 1,000,000 operations.
 
+Results are saved in results/d5-queries-scale.txt and
+results/d5-decreases-scale.txt.
+
+Integration into D4's differential harness and D6's benchmark
+harness is coordinated with their respective owners.
 
 ## Using these workloads in team tools
 
