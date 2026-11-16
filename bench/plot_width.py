@@ -14,6 +14,7 @@ def main():
     parser.add_argument("--update-percent", required=True, type=int)
     parser.add_argument("--seed", required=True, type=int)
     parser.add_argument("--workload", default="", help="workload name in the summary (random for maximum benchmarks)")
+    parser.add_argument("--decrease-percent", type=int, help="requested decrease percentage for maximum workloads")
     args = parser.parse_args()
 
     series = defaultdict(list)
@@ -21,7 +22,9 @@ def main():
         for row in csv.DictReader(file):
             if (int(row["n"]) == args.n and int(row["operations"]) == args.operations
                     and int(row["update_percent"]) == args.update_percent
-                    and int(row["seed"]) == args.seed and row.get("workload", "") == args.workload):
+                    and int(row["seed"]) == args.seed and row.get("workload", "") == args.workload
+                    and (row.get("decrease_percent", "") in ("", "-1") if args.decrease_percent is None
+                         else row.get("decrease_percent", "") == str(args.decrease_percent))):
                 if not row["replay_sd_ms"]:
                     parser.error("at least two runs are needed to plot standard deviation")
                 series[row["structure"]].append((int(row["width"]),
@@ -37,7 +40,10 @@ def main():
     plt.xlabel("Query width (elements)")
     plt.ylabel("Mixed replay time (ms)")
     metric = "Maximum" if args.workload else "GCD"
-    plt.title(f"{metric}: n={args.n}, updates={args.update_percent}%, seed={args.seed}")
+    title = f"{metric}: n={args.n}, updates={args.update_percent}%, seed={args.seed}"
+    if args.decrease_percent is not None:
+        title += f", decreases={args.decrease_percent}%"
+    plt.title(title)
     plt.grid(True, alpha=0.3)
     plt.legend()
     plt.tight_layout()

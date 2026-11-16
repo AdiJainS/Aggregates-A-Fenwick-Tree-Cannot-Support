@@ -9,17 +9,21 @@ g++ -std=c++17 -O2 -DSTRUCTA_ENABLE_COUNTERS bench/max_benchmark.cpp -o .bench-d
 g++ -std=c++17 -O2 bench/gcd_benchmark.cpp -o .bench-deps/gcd_benchmark.exe
 ```
 
-On this machine GCC 6.3 is too old for `std::gcd`. The local C++17 compiler is `../cpp-toolchain/ziglang/zig.exe`; replace `g++` in the commands with `& ../cpp-toolchain/ziglang/zig.exe c++` when building here. This compiler is not included in the repository.
+On this machine GCC 6.3 is too old for `std::gcd`. The local C++17 compiler is `C:\Users\Adi Jain\Documents\Codex\2026-11-10\my\work\cpp-toolchain\ziglang\zig.exe`; replace `g++` in the commands with `& "C:\Users\Adi Jain\Documents\Codex\2026-11-10\my\work\cpp-toolchain\ziglang\zig.exe" c++` when building here. This compiler is not included in the repository.
 
-Run a correctness check before timing. Arguments are `N OPERATIONS WIDTH UPDATE_PERCENT SEED RUNS WORKLOAD MODE`:
+Run a correctness check before timing. Arguments are `N OPERATIONS WIDTH UPDATE_PERCENT SEED RUNS WORKLOAD MODE [DECREASE_PERCENT]`:
 
 ```powershell
 .\.bench-deps\max_benchmark.exe 1000 10000 64 20 253 5 random check
+.\.bench-deps\max_benchmark.exe 1000 10000 64 20 253 5 random check 75
 .\.bench-deps\max_benchmark.exe 4096 1024 1 0 0 5 rebuild check
 .\.bench-deps\max_counts.exe 4096 1024 1 0 0 5 rebuild counts
+python bench/test_decrease.py .bench-deps/max_benchmark.exe
 ```
 
 Workloads are `random`, `rebuild`, `decrease` and `query`. The last three use D5's generators. For D5, `OPERATIONS` is the generator parameter: number of decreases or queries. The generator may produce more operations than that parameter. Its query endpoints are inclusive; the A adapter changes them to half-open ranges. The prefix-only baseline is checked and measured only when all queries start at index 0.
+
+For random workloads, the optional `DECREASE_PERCENT` chooses the percentage of updates intended to decrease the current value, from 0 to 100. Every selected update changes its current value by exactly one. The actual numbers of increases, decreases and unchanged assignments are written to the timing and counter CSVs. The selection is random, so the actual percentage may differ. When the argument is omitted, the original generator is used, preserving the old seeded workloads; the CSV records `-1` as the requested decrease percentage. D5 workloads also use `-1`.
 
 `check` compares every maximum query with D4's oracle, including A's count. `time` measures the max-only A tree and B. `prefix` times the baseline separately; it rejects non-prefix queries. `counts` requires the counter build. B always updates its counters, including during timing; A's counters are disabled for timing. This is a limitation of the current B implementation.
 
@@ -42,9 +46,10 @@ python bench/run_matrix.py .bench-deps/max_benchmark.exe results
 python bench/summarize.py (Get-ChildItem results/max-n*.csv | ForEach-Object { $_.FullName }) | Set-Content -Encoding utf8 results/max-summary.csv
 python bench/plot_width.py results/max-summary.csv results/max-width-u10.png --n 1000000 --operations 1000000 --update-percent 10 --seed 253 --workload random
 python bench/run_matrix.py .bench-deps/gcd_benchmark.exe results --metric gcd
+python bench/run_matrix.py .bench-deps/max_benchmark.exe new-results --decrease-percent 75
 ```
 
-The matrix uses widths 1, 1024 and 1000000 and update shares 10, 50 and 90 percent. The `run_matrix.py --help` options change the sizes and seed. For GCD, it checks and times the oracle at width 1 and runs only the tree for wider queries. CSV timings include build and mixed replay separately. Summary spread is sample standard deviation. D5 is deterministic; its CSV uses seed 0 and -1 for random-workload fields that do not apply.
+The matrix uses widths 1, 1024 and 1000000 and update shares 10, 50 and 90 percent. The `run_matrix.py --help` options change the sizes and seed. Files generated with `--decrease-percent` have a `-d` suffix. The script refuses to overwrite existing files. For plots from these files, pass the same `--decrease-percent` to `plot_width.py`. The summary groups different requested decrease percentages separately; older CSVs without the new fields remain supported. For GCD, the matrix checks and times the oracle at width 1 and runs only the tree for wider queries. CSV timings include build and mixed replay separately. Summary spread is sample standard deviation. D5 is deterministic; its CSV uses seed 0 and -1 for random-workload fields that do not apply.
 
 GCD benchmark arguments are `N OPERATIONS WIDTH UPDATE_PERCENT SEED RUNS MODE`, where mode is `check`, `tree` or `oracle`:
 
