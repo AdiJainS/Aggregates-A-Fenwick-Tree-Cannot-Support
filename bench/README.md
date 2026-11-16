@@ -28,7 +28,7 @@ For random workloads, the optional `DECREASE_PERCENT` chooses the percentage of 
 
 `check` compares every maximum query with D4's oracle, including A's count. `time` measures the max-only A tree and B. `prefix` times the baseline separately; it rejects non-prefix queries. `counts` requires the counter build. B always updates its counters, including during timing; A's counters are disabled for timing. This is a limitation of the current B implementation.
 
-`time-a` and `time-b` run only A or B, respectively. These modes help record separate profiler traces while using the same seed and arguments. See `results/cache/README.md` for the attempted cache profile and recording instructions.
+`time-a` and `time-b` run only A or B, respectively. These modes help record separate profiler traces while using the same seed and arguments. See `results/cache/README.md` for the cache recordings and instructions.
 
 For D5's full-scale query and decrease cases, `check-scale` checks every result against the known expected maximum and count. `counts-ab` collects A and B counters without running the prefix baseline, whose repeated full rebuilds are too expensive at this size:
 

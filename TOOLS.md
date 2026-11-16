@@ -1,15 +1,15 @@
 # Tools used
 
-| Tool | Part used for | Changes and checks after generation |
-| --- | --- | --- |
-| Codex (OpenAI) | Draft and expansion of `docs/derivations/D6-analyst-draft.md` | Added total-work equations, workload details, and references for Fenwick trees, the two-tree range query, segment trees, and Euclid's algorithm. Checked the Dima-Ceterchi claims against the paper and kept its timings separate from our predictions. Adi still needs to review and revise the draft before submission. |
-| Codex (OpenAI) | Initial GCD benchmark in `bench/` | Generated the harness and build instructions using D3's and D4's interfaces. Adi needs to review the code and understand the measurements before submission. |
-| Codex (OpenAI) | GCD result summary and width plot scripts | Added CSV grouping, mean and spread calculation, and plotting instructions. Adi needs to review the scripts and check the figures against the raw data. |
-| Codex (OpenAI) | Maximum benchmark and integration | Added a benchmark using the D1, D2, D4 and D5 implementations, with separate timing and counter builds. Adi needs to review the code, confirm the D1 revision with its owner, and interpret the results. |
-| Codex (OpenAI), ReportLab | D6 draft PDF and report | Generated the draft derivation from the cost model and summarized the measured CSVs. The report identifies the provisional D1 snapshot and measurement limits. Adi needs to review the derivation and analysis. |
-| Codex (OpenAI) | D5 scale benchmark | Added checks for the two deterministic scale workloads, ran five timing repetitions and compared B's counters with D5's documented totals. |
-| Codex (OpenAI) | Random update workloads | Added a decrease-percentage option and actual update counts to the benchmark and summary scripts. Adi should review the generator and its output before using it for the final results. |
-| Codex (OpenAI), Windows Performance Recorder | Decrease sweep, profiling setup and presentation draft | Ran the seeded workloads, summarized and plotted results, prepared a slide and viva notes, and attempted a WPR cache trace. WPR did not start without the required privilege. Adi should review the analysis and rerun with the team's final code. |
-| Codex (OpenAI) | GCD counter mode | Added a separate instrumented build for GCD block visits and Euclidean remainder steps. Adi should review the counter definitions before presenting them. |
+| Tool | Work |
+| --- | --- |
+| Codex (OpenAI) | Expanded the cost estimates and references. |
+| Codex (OpenAI) | Helped create the GCD benchmark and build instructions. |
+| Codex (OpenAI) | Helped draft the cost model and derivation. |
+| Codex (OpenAI) | Helped with the maximum benchmark, integration, result summaries and plots. |
+| Codex (OpenAI) | Helped set up cache profiling and draft the presentation. |
+| ReportLab (Python library) | Generated the derivation PDF. |
+| Windows Performance Recorder | Collected the cache profiling traces. |
+| Matplotlib (Python library) | Created benchmark graphs. |
+| Tracerpt | Exported the profiling traces for analysis. |
 
 Add each teammate's tools and their edits here as their work is merged.

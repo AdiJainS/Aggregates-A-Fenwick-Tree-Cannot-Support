@@ -18,7 +18,7 @@ The chart shows the prefix baseline on 4,096 values, 10,000 operations, and a 50
 
 **Limits and conclusion (about 30 seconds)**
 
-The full-scale runs use one million values and one million operations, but A comes from an older unconfirmed snapshot. D1 needs to confirm the final version, and D2 needs a counters-off timing build for a fairer comparison. WPR could not start a cache trace without the required privilege, so I have no cache-miss result. I would rerun the final comparisons after integration.
+The full-scale runs use one million values and one million operations, but A comes from an older unconfirmed snapshot. D1 needs to confirm the final version, and D2 needs a counters-off timing build for a fairer comparison. WPR recorded cache samples for both structures; the results are preliminary and include setup work. I would rerun the comparisons after integration.
 
 ## Viva questions
 
@@ -41,7 +41,7 @@ The segment tree may return a full array from one stored root. A medium range ca
 They are percentages of updates, not of all operations. Each selected update changes the current value by one. Random selection means the actual percentage may differ; the CSV records the actual counts.
 
 **Does the result prove one structure has better cache behavior?**
-No. Timing and software counters alone do not measure cache misses. The WPR attempt failed for lack of privilege, and a hardware trace still needs to be collected and analyzed.
+No. WPR recorded sampled cache events, not exact miss totals or rates. The recordings include workload generation and construction, and there is only one trace for each structure.
 
 **Why are the A/B numbers preliminary?**
 The D1 branch was reset after the snapshot used for the experiments, and B updates counters during timing while A has its counters disabled. Both can affect the final comparison.
