@@ -1,0 +1,9 @@
+Workload: difficult queries
+Elements: 1048576
+Operations: 1000000
+Assignments: 0
+Queries checked: 1000000
+Query steps: 39000000
+Assignment steps: 0
+Lowered blocks: 0
+PASS: all answers and counter totals are correct

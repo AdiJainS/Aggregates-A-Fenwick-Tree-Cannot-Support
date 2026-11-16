@@ -1,0 +1,9 @@
+Workload: repeated decreases
+Elements: 1048576
+Operations: 1000000
+Assignments: 500000
+Queries checked: 500000
+Query steps: 10500000
+Assignment steps: 21000000
+Lowered blocks: 11000000
+PASS: all answers and counter totals are correct
