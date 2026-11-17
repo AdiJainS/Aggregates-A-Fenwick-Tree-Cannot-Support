@@ -5,86 +5,85 @@
 #include "../src/structB/fenwick_max.hpp"
 #include "../src/structB/prefix_fenwick_max.hpp"
 
-long long arrayMax(const std::vector<long long>& values) {
-    long long answer = values[0];
-
-    for (long long value : values) {
-        if (value > answer) {
-            answer = value;
-        }
-    }
-
-    return answer;
-}
+using namespace std;
 
 int main() {
-    const int n = 4;
-    const int k = 4;
+    int n = 4;
+    int k = 4;
 
     Workload workload = makeRebuildWorkload(n, k);
 
-    PrefixFenwickMax baseline(workload.initial);
-    PrefixFenwickMax increaseOnly(workload.initial);
-    FenwickMax twoTree(workload.initial);
+    vector<long long> values = workload.initial;
 
-    std::vector<long long> reference = workload.initial;
+    PrefixFenwickMax baseline(values);
+    PrefixFenwickMax increaseOnly(values);
+    FenwickMax twoTree(values);
 
-    int checked = 0;
-    int staleAnswers = 0;
+    int queries = 0;
+    int wrongAnswers = 0;
 
-    for (const Operation& op : workload.operations) {
+    for (int i = 0; i < workload.operations.size(); i++) {
+        Operation op = workload.operations[i];
+
         if (op.type == OpType::ASSIGN) {
-            reference[op.l] = op.value;
+            values[op.l] = op.value;
 
             baseline.assign(op.l, op.value);
             increaseOnly.assignIncreaseOnly(op.l, op.value);
             twoTree.assign(op.l, op.value);
         }
         else if (op.type == OpType::QUERY_MAX) {
-            long long expected = arrayMax(reference);
-            long long baselineAnswer = baseline.queryPrefix(op.r);
-            long long twoTreeAnswer = twoTree.queryMax(op.l, op.r);
-            long long stale = increaseOnly.queryPrefix(op.r);
+            // Find the correct maximum by checking the array.
+            long long expected = values[0];
 
-            checked++;
+            for (int j = 1; j < n; j++) {
+                if (values[j] > expected) {
+                    expected = values[j];
+                }
+            }
 
-            std::cout << "Expected: " << expected
-                      << ", baseline: " << baselineAnswer
-                      << ", two-tree: " << twoTreeAnswer
-                      << ", increase-only: " << stale << '\n';
+            long long answer1 = baseline.queryPrefix(op.r);
+            long long answer2 = twoTree.queryMax(op.l, op.r);
+            long long answer3 = increaseOnly.queryPrefix(op.r);
 
-            if (baselineAnswer != expected ||
-                twoTreeAnswer != expected) {
-                std::cerr << "FAIL: incorrect answer\n";
+            cout << "Expected: " << expected
+                 << ", baseline: " << answer1
+                 << ", two-tree: " << answer2
+                 << ", increase-only: " << answer3 << '\n';
+
+            if (answer1 != expected || answer2 != expected) {
+                cout << "FAIL: incorrect answer\n";
                 return 1;
             }
 
-            if (stale != expected) {
-                staleAnswers++;
+            if (answer3 != expected) {
+                wrongAnswers++;
             }
+
+            queries++;
         }
     }
 
-    std::cout << "Queries checked: " << checked << '\n';
-    std::cout << "Baseline rebuilds: "
-              << baseline.rebuildCount() << '\n';
-    std::cout << "Increase-only wrong answers: "
-              << staleAnswers << '\n';
+    cout << "Queries checked: " << queries << '\n';
+    cout << "Baseline rebuilds: " << baseline.rebuildCount() << '\n';
+    cout << "Increase-only wrong answers: " << wrongAnswers << '\n';
 
-    std::cout << "Two-tree assignment steps: "
-              << twoTree.assignBlocks << '\n';
-    std::cout << "Two-tree lowered blocks: "
-              << twoTree.loweredBlocks << '\n';
-    std::cout << "Two-tree query steps: "
-              << twoTree.queryBlocks << '\n';
+    cout << "Two-tree assignment steps: "
+         << twoTree.assignBlocks << '\n';
 
-    if (checked != k ||
+    cout << "Two-tree lowered blocks: "
+         << twoTree.loweredBlocks << '\n';
+
+    cout << "Two-tree query steps: "
+         << twoTree.queryBlocks << '\n';
+
+    if (queries != k ||
         baseline.rebuildCount() != k ||
-        staleAnswers != k) {
-        std::cerr << "FAIL: unexpected counts\n";
+        wrongAnswers != k) {
+        cout << "FAIL: unexpected counts\n";
         return 1;
     }
 
-    std::cout << "PASS\n";
+    cout << "PASS\n";
     return 0;
 }

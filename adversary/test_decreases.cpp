@@ -4,38 +4,46 @@
 #include "generators.hpp"
 #include "../src/structB/fenwick_max.hpp"
 
+using namespace std;
+
 int main() {
-    for (int n = 4; n <= 256; n *= 2) {
+    for (int n = 4; n <= 256; n = n * 2) {
         Workload workload = makeDecreaseWorkload(n, 10);
         FenwickMax tree(workload.initial);
 
-        long long candidateSteps = 0;
-        long long candidateLowered = 0;
-
-        // Replay repeated decreases and verify every query.
+        long long chosenSteps = 0;
+        long long chosenLowered = 0;
         long long expected = workload.initial[0];
 
-        for (const Operation& op : workload.operations) {
+        bool firstUpdate = true;
+
+        // Check repeated decreases at index 0.
+        for (int i = 0; i < workload.operations.size(); i++) {
+            Operation op = workload.operations[i];
+
             if (op.type == OpType::ASSIGN) {
                 tree.resetCounters();
                 tree.assign(op.l, op.value);
 
                 expected = op.value;
 
-                if (candidateSteps == 0) {
-                    candidateSteps = tree.assignBlocks;
-                    candidateLowered = tree.loweredBlocks;
+                if (firstUpdate) {
+                    chosenSteps = tree.assignBlocks;
+                    chosenLowered = tree.loweredBlocks;
+                    firstUpdate = false;
                 }
 
-                if (tree.assignBlocks != candidateSteps ||
-                    tree.loweredBlocks != candidateLowered) {
-                    std::cerr << "FAIL: repeated decrease counts changed\n";
+                if (tree.assignBlocks != chosenSteps ||
+                    tree.loweredBlocks != chosenLowered) {
+                    cout << "FAIL: repeated update counts changed\n";
                     return 1;
                 }
             }
             else if (op.type == OpType::QUERY_MAX) {
-                if (tree.queryMax(op.l, op.r) != expected) {
-                    std::cerr << "FAIL: wrong maximum after decrease\n";
+                long long answer = tree.queryMax(op.l, op.r);
+
+                if (answer != expected) {
+                    cout << "FAIL: wrong answer after decrease\n";
                     return 1;
                 }
             }
@@ -44,42 +52,41 @@ int main() {
         long long maximumSteps = 0;
         long long maximumLowered = 0;
 
-        // Try every update position, each with its own unique maximum.
-        for (int index = 0; index < n; index++) {
-            std::vector<long long> values(n, 0);
-            values[index] = 2;
+        // Test every possible update position.
+        for (int position = 0; position < n; position++) {
+            vector<long long> values(n, 0);
+            values[position] = 2;
 
-            FenwickMax candidate(values);
-            candidate.assign(index, 1);
+            FenwickMax otherTree(values);
+            otherTree.assign(position, 1);
 
-            if (candidate.assignBlocks > maximumSteps) {
-                maximumSteps = candidate.assignBlocks;
+            if (otherTree.assignBlocks > maximumSteps) {
+                maximumSteps = otherTree.assignBlocks;
             }
 
-            if (candidate.loweredBlocks > maximumLowered) {
-                maximumLowered = candidate.loweredBlocks;
+            if (otherTree.loweredBlocks > maximumLowered) {
+                maximumLowered = otherTree.loweredBlocks;
             }
 
-            if (candidate.queryMax(0, n - 1) != 1) {
-                std::cerr << "FAIL: wrong maximum in position check\n";
+            if (otherTree.queryMax(0, n - 1) != 1) {
+                cout << "FAIL: wrong answer in position check\n";
                 return 1;
             }
         }
 
-        std::cout << "n=" << n
-                  << ", steps=" << candidateSteps
-                  << ", maximum steps=" << maximumSteps
-                  << ", lowered=" << candidateLowered
-                  << ", maximum lowered=" << maximumLowered
-                  << '\n';
+        cout << "n=" << n
+             << ", steps=" << chosenSteps
+             << ", maximum steps=" << maximumSteps
+             << ", lowered=" << chosenLowered
+             << ", maximum lowered=" << maximumLowered << '\n';
 
-        if (candidateSteps != maximumSteps ||
-            candidateLowered != maximumLowered) {
-            std::cerr << "FAIL: index 0 did not reach both maxima\n";
+        if (chosenSteps != maximumSteps ||
+            chosenLowered != maximumLowered) {
+            cout << "FAIL: index 0 did not reach both maxima\n";
             return 1;
         }
     }
 
-    std::cout << "PASS: repeated decreases reach both tested maxima\n";
+    cout << "PASS: decreases reach both tested maxima\n";
     return 0;
 }
