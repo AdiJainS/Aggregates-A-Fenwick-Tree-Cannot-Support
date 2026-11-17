@@ -6,14 +6,21 @@
 using namespace std;
 using Value = unsigned long long;
 
+unsigned long long gcd_merges = 0, remainder_steps = 0, max_merges = 0;
+
 struct MaxCount {
     long long maximum;
     int count;
+    bool operator==(const MaxCount& other) const {
+        return maximum == other.maximum && count == other.count;
+    }
 };
 
 struct GcdMerge {
     Value operator()(Value a, Value b) const {
+        ++gcd_merges;
         while (b != 0) {
+            ++remainder_steps;
             Value remainder = a % b;
             a = b;
             b = remainder;
@@ -24,6 +31,7 @@ struct GcdMerge {
 
 struct MaxMerge {
     MaxCount operator()(MaxCount a, MaxCount b) const {
+        ++max_merges;
         if (a.maximum > b.maximum) return a;
         if (b.maximum > a.maximum) return b;
         return {a.maximum, a.count + b.count};
@@ -53,6 +61,12 @@ public:
             position /= 2;
             tree[position] = merge(tree[2*position], tree[2*position+1]);
         }
+    }
+
+    bool valid() const {
+        for (int i = 1; i < base; ++i)
+            if (!(tree[i] == merge(tree[2*i], tree[2*i+1]))) return false;
+        return true;
     }
 
     T query(int left, int right) const {
@@ -110,6 +124,10 @@ public:
         calibrations.assign(index, sensor.calibration);
     }
 
+    bool valid() const {
+        return readings.valid() && calibrations.valid();
+    }
+
     Answer query(int left, int right) const {
         if (left < 0 || left > right || right > size)
             throw runtime_error("Invalid range");
@@ -153,11 +171,118 @@ int replay() {
     return 0;
 }
 
-int main() {
+unsigned long long next_random(unsigned long long& state) {
+    state = state * 6364136223846793005ULL + 1442695040888963407ULL;
+    return state;
+}
+
+Value oracle_gcd(Value a, Value b) {
+    while (b != 0) {
+        Value remainder = a % b;
+        a = b;
+        b = remainder;
+    }
+    return a;
+}
+
+Answer scan(const vector<Sensor>& sensors, int left, int right) {
+    Answer result{-1, 0, 0};
+    for (int i = left; i < right; ++i) {
+        if (sensors[i].reading > result.maximum) {
+            result.maximum = sensors[i].reading;
+            result.count = 1;
+        } else if (sensors[i].reading == result.maximum) {
+            ++result.count;
+        }
+        result.gcd = oracle_gcd(result.gcd, sensors[i].calibration);
+    }
+    return result;
+}
+
+void check_range(const vector<Sensor>& sensors, const SensorReplay& app,
+                 int left, int right, bool audit = true) {
+    if (audit && !app.valid()) throw runtime_error("Internal node invariant failed");
+    Answer actual = app.query(left, right);
+    Answer expected = scan(sensors, left, right);
+    if (actual.maximum != expected.maximum || actual.count != expected.count ||
+        actual.gcd != expected.gcd)
+        throw runtime_error("Array comparison failed for range " +
+                            to_string(left) + " " + to_string(right));
+}
+
+int tests(int operations) {
+    for (int n = 0; n <= 17; ++n) {
+        vector<Sensor> sensors(n, {0, 0});
+        SensorReplay app(sensors);
+        for (int step = 0; step <= n; ++step) {
+            for (int left = 0; left <= n; ++left)
+                for (int right = left; right <= n; ++right)
+                    check_range(sensors, app, left, right);
+            if (step < n) {
+                sensors[step] = {7, static_cast<Value>(step % 2 ? 89 : 144)};
+                app.assign(step, sensors[step]);
+            }
+        }
+        for (int i = 0; i < n; ++i) {
+            sensors[i] = {0, 0};
+            app.assign(i, sensors[i]);
+            for (int left = 0; left <= n; ++left)
+                for (int right = left; right <= n; ++right)
+                    check_range(sensors, app, left, right);
+        }
+    }
+    vector<Sensor> limits{{1000000000, 1000000000}, {1000000000, 0}, {0, 1}};
+    SensorReplay limit_app(limits);
+    check_range(limits, limit_app, 0, 3);
+    limit_app.assign(0, {0, 0});
+    limits[0] = {0, 0};
+    check_range(limits, limit_app, 0, 3);
+    unsigned long long seed = 253;
+    const int n = 37;
+    vector<Sensor> sensors(n, {0, 0});
+    SensorReplay app(sensors);
+    for (int step = 0; step < operations; ++step) {
+        unsigned long long choice = next_random(seed);
+        if ((choice >> 32) % 2) {
+            int index = static_cast<int>((next_random(seed) >> 32) % n);
+            long long reading = static_cast<long long>((next_random(seed) >> 32) % 13);
+            Value calibration = (next_random(seed) >> 32) % 1001;
+            sensors[index] = {reading, calibration};
+            app.assign(index, sensors[index]);
+        } else {
+            int left = static_cast<int>((next_random(seed) >> 32) % (n+1));
+            int right = static_cast<int>((next_random(seed) >> 32) % (n+1));
+            if (left > right) swap(left, right);
+            check_range(sensors, app, left, right);
+        }
+    }
+    bool rejected = false;
+    try { app.assign(n, {1, 1}); } catch (const exception&) { rejected = true; }
+    if (!rejected) throw runtime_error("Invalid index was accepted");
+    rejected = false;
+    try { app.query(2, 1); } catch (const exception&) { rejected = true; }
+    if (!rejected) throw runtime_error("Invalid range was accepted");
+    rejected = false;
+    try { app.assign(0, {-1, 1}); } catch (const exception&) { rejected = true; }
+    if (!rejected) throw runtime_error("Negative reading was accepted");
+    cout << "PASS: edge cases and " << operations << " seeded operations, seed=253\n";
+    return 0;
+}
+
+int main(int argc, char* argv[]) {
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
     try {
-        return replay();
+        int result;
+        if (argc == 1) result = replay();
+        else if (argc == 2 && string(argv[1]) == "--test") result = tests(10000);
+
+        else throw runtime_error("Usage: sensor_replay [--test]");
+        if (argc > 1) {
+            cerr << "gcd_merges=" << gcd_merges << " remainder_steps=" << remainder_steps
+                 << " max_merges=" << max_merges << '\n';
+        }
+        return result;
     } catch (const exception& error) {
         cerr << error.what() << '\n';
         return 1;
