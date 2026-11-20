@@ -1,0 +1,2 @@
+trace,sha256,process,pid,source_id,sample_interval,process_seconds,thread_id_samples,lifetime_samples,outside_lifetime
+results/cache/b-current-2026-11-17.etl,9cef27233adacd26a2996ddac3e38741ba4bbd79bead0455e18f810e61b18e36,max_benchmark_cache_current.exe,31208,10,65536,4.746951,4892,4891,1

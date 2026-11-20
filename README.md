@@ -5,3 +5,5 @@ The `bench/` folder contains the GCD and maximum benchmarks. See [bench/README.m
 The structure and adversarial files are snapshots for the D6 benchmark. Confirm the team's final versions before using them in the release.
 
 `presentation/` contains a draft D6 slide and viva notes. `results/cache/` describes the cache recordings and their limits.
+
+The latest local counters-off runs are in [results/timing-2026-11-20](results/timing-2026-11-20/README.md). The report separates these from earlier timings and cache recordings.

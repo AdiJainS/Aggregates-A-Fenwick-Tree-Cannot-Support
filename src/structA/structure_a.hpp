@@ -10,7 +10,7 @@ namespace structA {
 struct StructureACounters {
     SegmentTreeCounters maximum;
     SegmentTreeCounters gcd;
-    std::uint64_t gcdRemainderSteps = 0;
+    unsigned long long gcdRemainderSteps = 0;
 };
 
 class StructureA {
@@ -27,23 +27,24 @@ private:
     }
 
 public:
-    StructureA() = default;
+    StructureA() {}
 
-    explicit StructureA(const std::vector<long long>& values) {
+    StructureA(const std::vector<long long>& values) {
         build(values);
     }
 
     void build(const std::vector<long long>& values) {
-        n_ = static_cast<int>(values.size());
+        n_ = (int)values.size();
 
         std::vector<MaxCountNode> maxLeaves;
         std::vector<GcdValue> gcdLeaves;
-        maxLeaves.reserve(values.size());
-        gcdLeaves.reserve(values.size());
 
-        for (long long value : values) {
-            maxLeaves.push_back({value, 1});
-            gcdLeaves.push_back(gcdMagnitude(value));
+        for (int i = 0; i < n_; i++) {
+            MaxCountNode node;
+            node.maximum = values[i];
+            node.count = 1;
+            maxLeaves.push_back(node);
+            gcdLeaves.push_back(gcdMagnitude(values[i]));
         }
 
         maxTree_.build(maxLeaves);
@@ -51,7 +52,7 @@ public:
         built_ = true;
     }
 
-    int size() const noexcept {
+    int size() const {
         return n_;
     }
 
@@ -61,7 +62,10 @@ public:
             throw std::out_of_range("StructureA::assign: invalid index");
         }
 
-        maxTree_.assign(index, MaxCountNode{value, 1});
+        MaxCountNode node;
+        node.maximum = value;
+        node.count = 1;
+        maxTree_.assign(index, node);
         gcdTree_.assign(index, gcdMagnitude(value));
     }
 
@@ -76,33 +80,34 @@ public:
     }
 
     bool debugCheckAgainst(const std::vector<long long>& values) const {
-        if (!built_ || static_cast<int>(values.size()) != n_) {
+        if (!built_ || (int)values.size() != n_) {
             return false;
         }
 
         std::vector<MaxCountNode> expectedMax;
         std::vector<GcdValue> expectedGcd;
-        expectedMax.reserve(values.size());
-        expectedGcd.reserve(values.size());
 
-        for (long long value : values) {
-            expectedMax.push_back({value, 1});
-            expectedGcd.push_back(gcdMagnitude(value));
+        for (int i = 0; i < n_; i++) {
+            MaxCountNode node;
+            node.maximum = values[i];
+            node.count = 1;
+            expectedMax.push_back(node);
+            expectedGcd.push_back(gcdMagnitude(values[i]));
         }
 
         return maxTree_.debugCheckAgainst(expectedMax) &&
                gcdTree_.debugCheckAgainst(expectedGcd);
     }
 
-    StructureACounters counters() const noexcept {
-        return {
-            maxTree_.counters(),
-            gcdTree_.counters(),
-            gcdTree_.euclidRemainderSteps()
-        };
+    StructureACounters counters() const {
+        StructureACounters result;
+        result.maximum = maxTree_.counters();
+        result.gcd = gcdTree_.counters();
+        result.gcdRemainderSteps = gcdTree_.euclidRemainderSteps();
+        return result;
     }
 
-    void resetCounters() const noexcept {
+    void resetCounters() const {
         maxTree_.resetCounters();
         gcdTree_.resetCounters();
     }
@@ -113,9 +118,9 @@ private:
     SegmentTree<GcdValue, GcdOps> tree_;
 
 public:
-    GcdSegmentTree() = default;
+    GcdSegmentTree() {}
 
-    explicit GcdSegmentTree(const std::vector<GcdValue>& values) {
+    GcdSegmentTree(const std::vector<GcdValue>& values) {
         tree_.build(values);
     }
 
@@ -131,15 +136,15 @@ public:
         return tree_.query(l, r);
     }
 
-    SegmentTreeCounters counters() const noexcept {
+    SegmentTreeCounters counters() const {
         return tree_.counters();
     }
 
-    std::uint64_t euclidRemainderSteps() const noexcept {
+    unsigned long long euclidRemainderSteps() const {
         return tree_.euclidRemainderSteps();
     }
 
-    void resetCounters() const noexcept {
+    void resetCounters() const {
         tree_.resetCounters();
     }
 

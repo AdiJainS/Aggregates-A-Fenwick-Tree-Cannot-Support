@@ -4,7 +4,7 @@ Build with a C++17 compiler, from the repository root:
 
 ```powershell
 New-Item -ItemType Directory -Force .bench-deps | Out-Null
-g++ -std=c++17 -O2 bench/max_benchmark.cpp -o .bench-deps/max_benchmark.exe
+g++ -std=c++17 -O2 -DSTRUCTB_DISABLE_COUNTERS bench/max_benchmark.cpp -o .bench-deps/max_benchmark.exe
 g++ -std=c++17 -O2 -DSTRUCTA_ENABLE_COUNTERS bench/max_benchmark.cpp -o .bench-deps/max_counts.exe
 g++ -std=c++17 -O2 bench/gcd_benchmark.cpp -o .bench-deps/gcd_benchmark.exe
 g++ -std=c++17 -O2 -DSTRUCTA_ENABLE_COUNTERS bench/gcd_benchmark.cpp -o .bench-deps/gcd_counts.exe
@@ -26,7 +26,7 @@ Workloads are `random`, `rebuild`, `decrease` and `query`. The last three use D5
 
 For random workloads, the optional `DECREASE_PERCENT` chooses the percentage of updates intended to decrease the current value, from 0 to 100. Every selected update changes its current value by exactly one. The actual numbers of increases, decreases and unchanged assignments are written to the timing and counter CSVs. The selection is random, so the actual percentage may differ. When the argument is omitted, the original generator is used, preserving the old seeded workloads; the CSV records `-1` as the requested decrease percentage. D5 workloads also use `-1`.
 
-`check` compares every maximum query with D4's oracle, including A's count. `time` measures the max-only A tree and B. `prefix` times the baseline separately; it rejects non-prefix queries. `counts` requires the counter build. B always updates its counters, including during timing; A's counters are disabled for timing. This is a limitation of the current B implementation.
+`check` compares every maximum query with D4's oracle, including A's count. `time` measures the max-only A tree and B. `prefix` times the baseline separately; it rejects non-prefix queries. `counts` requires the counter build. Build maximum timing runs with `-DSTRUCTB_DISABLE_COUNTERS` and without `STRUCTA_ENABLE_COUNTERS`, so A and B both have counters disabled. Build counter runs with `-DSTRUCTA_ENABLE_COUNTERS` and without `STRUCTB_DISABLE_COUNTERS`, so both collect counters. The harness rejects timing or counter modes built with the wrong settings. The switch is local to the D6 copy of B; the data-structure algorithm is unchanged.
 
 `time-a` and `time-b` run only A or B, respectively. These modes help record separate profiler traces while using the same seed and arguments. See `results/cache/README.md` for the cache recordings and instructions.
 

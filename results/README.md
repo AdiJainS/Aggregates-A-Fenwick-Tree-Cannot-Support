@@ -1,5 +1,9 @@
 # Benchmark results
 
+The 20 November counters-off maximum timings are in `timing-2026-11-20/`. Its README records revisions, compiler flags and checks. These runs disable both A and B counters. Earlier folders retain their original instrumentation. For the newer cache recordings and the difference between B's 4,892 thread-ID samples and 4,891 lifetime-filtered samples, see `cache/README.md`.
+
+The 17 November rerun is in `d1-update/` and `d1-update-decreases/`. It uses D1 `01da510`, D2 `e925e6f`, D4 `14fc835` and D5 `5085c20`, with the same machine, compiler and benchmark settings described below. The nine maximum timing files have matching A/B checksums. D4's D1 differential test and D2 million-operation test passed, as did both D5 scale checks. D1's submission revision still needs confirmation, and B's counters remained active during timing. The cache traces below are from the earlier D1 revision, not this rerun.
+
 Recorded on 16 November 2026. These are preliminary results for the snapshots listed below. The D1 branch was reset after revision `905f6f28b03c0e3c0aa81089e84fe3ad5bb3bffd`; its owner must confirm the version used here. Do not treat the figures as final team results until the structures are agreed and rechecked.
 
 - D1: `905f6f28b03c0e3c0aa81089e84fe3ad5bb3bffd` (earlier snapshot, no longer at the branch tip).

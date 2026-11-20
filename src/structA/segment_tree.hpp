@@ -1,73 +1,73 @@
 #pragma once
 
-#include <cstdint>
-#include <limits>
+#include <climits>
 #include <stdexcept>
-#include <type_traits>
-#include <utility>
 #include <vector>
 
 namespace structA {
 
-using GcdValue = unsigned long long;
+typedef unsigned long long GcdValue;
 
 struct MaxCountNode {
-    long long maximum = std::numeric_limits<long long>::lowest();
+    long long maximum = LLONG_MIN;
     int count = 0;
 
-    bool operator==(const MaxCountNode& other) const noexcept {
+    bool operator==(const MaxCountNode& other) const {
         return maximum == other.maximum && count == other.count;
     }
 
-    bool operator!=(const MaxCountNode& other) const noexcept {
+    bool operator!=(const MaxCountNode& other) const {
         return !(*this == other);
     }
 };
 
 struct SegmentTreeCounters {
-    std::uint64_t buildMerges = 0;
-    std::uint64_t queryCalls = 0;
-    std::uint64_t queryBlocks = 0;
-    std::uint64_t queryMerges = 0;
-    std::uint64_t updateVisits = 0;
-    std::uint64_t updateMerges = 0;
+    unsigned long long buildMerges = 0;
+    unsigned long long queryCalls = 0;
+    unsigned long long queryBlocks = 0;
+    unsigned long long queryMerges = 0;
+    unsigned long long updateVisits = 0;
+    unsigned long long updateMerges = 0;
 };
 
 struct MaxCountOps {
-    MaxCountNode identity() const noexcept {
-        return {
-            std::numeric_limits<long long>::lowest(),
-            0
-        };
+    MaxCountNode identity() const {
+        MaxCountNode result;
+        result.maximum = LLONG_MIN;
+        result.count = 0;
+        return result;
     }
 
-    MaxCountNode merge(
-        const MaxCountNode& left,
-        const MaxCountNode& right
-    ) const noexcept {
+    MaxCountNode merge(const MaxCountNode& left, const MaxCountNode& right) const {
         if (left.maximum > right.maximum) return left;
         if (right.maximum > left.maximum) return right;
-        return {left.maximum, left.count + right.count};
+        MaxCountNode result;
+        result.maximum = left.maximum;
+        result.count = left.count + right.count;
+        return result;
     }
 
-    void resetCounters() const noexcept {}
-    std::uint64_t euclidRemainderSteps() const noexcept { return 0; }
+    void resetCounters() const {}
+
+    unsigned long long euclidRemainderSteps() const {
+        return 0;
+    }
 };
 
 struct GcdOps {
 #ifdef STRUCTA_ENABLE_COUNTERS
-    mutable std::uint64_t remainderSteps = 0;
+    mutable unsigned long long remainderSteps = 0;
 #endif
 
-    GcdValue identity() const noexcept {
+    GcdValue identity() const {
         return 0ULL;
     }
 
-    GcdValue merge(GcdValue a, GcdValue b) const noexcept {
+    GcdValue merge(GcdValue a, GcdValue b) const {
         while (b != 0ULL) {
-            const GcdValue remainder = a % b;
+            GcdValue remainder = a % b;
 #ifdef STRUCTA_ENABLE_COUNTERS
-            ++remainderSteps;
+            remainderSteps++;
 #endif
             a = b;
             b = remainder;
@@ -75,13 +75,13 @@ struct GcdOps {
         return a;
     }
 
-    void resetCounters() const noexcept {
+    void resetCounters() const {
 #ifdef STRUCTA_ENABLE_COUNTERS
         remainderSteps = 0;
 #endif
     }
 
-    std::uint64_t euclidRemainderSteps() const noexcept {
+    unsigned long long euclidRemainderSteps() const {
 #ifdef STRUCTA_ENABLE_COUNTERS
         return remainderSteps;
 #else
@@ -96,71 +96,43 @@ private:
     int n_ = 0;
     int base_ = 1;
     std::vector<Node> tree_;
-    Ops ops_{};
-    mutable SegmentTreeCounters counters_{};
-
-    void countBuildMerge() noexcept {
-#ifdef STRUCTA_ENABLE_COUNTERS
-        ++counters_.buildMerges;
-#endif
-    }
-
-    void countQueryBlock() const noexcept {
-#ifdef STRUCTA_ENABLE_COUNTERS
-        ++counters_.queryBlocks;
-#endif
-    }
-
-    void countQueryMerge() const noexcept {
-#ifdef STRUCTA_ENABLE_COUNTERS
-        ++counters_.queryMerges;
-#endif
-    }
-
-    void countUpdateVisit() noexcept {
-#ifdef STRUCTA_ENABLE_COUNTERS
-        ++counters_.updateVisits;
-#endif
-    }
-
-    void countUpdateMerge() noexcept {
-#ifdef STRUCTA_ENABLE_COUNTERS
-        ++counters_.updateMerges;
-#endif
-    }
+    Ops ops_;
+    mutable SegmentTreeCounters counters_;
 
 public:
-    SegmentTree() = default;
+    SegmentTree() {}
 
-    explicit SegmentTree(const std::vector<Node>& values) {
+    SegmentTree(const std::vector<Node>& values) {
         build(values);
     }
 
     void build(const std::vector<Node>& values) {
-        n_ = static_cast<int>(values.size());
+        n_ = (int)values.size();
         base_ = 1;
         while (base_ < n_) {
-            base_ <<= 1;
+            base_ = base_ * 2;
         }
 
-        tree_.assign(static_cast<std::size_t>(2) * base_, ops_.identity());
-        for (int i = 0; i < n_; ++i) {
+        tree_.assign(2 * base_, ops_.identity());
+        for (int i = 0; i < n_; i++) {
             tree_[base_ + i] = values[i];
         }
 
-        counters_ = {};
+        counters_ = SegmentTreeCounters();
         ops_.resetCounters();
-        for (int p = base_ - 1; p >= 1; --p) {
+        for (int p = base_ - 1; p >= 1; p--) {
             tree_[p] = ops_.merge(tree_[2 * p], tree_[2 * p + 1]);
-            countBuildMerge();
+#ifdef STRUCTA_ENABLE_COUNTERS
+            counters_.buildMerges++;
+#endif
         }
     }
 
-    int size() const noexcept {
+    int size() const {
         return n_;
     }
 
-    int base() const noexcept {
+    int base() const {
         return base_;
     }
 
@@ -171,13 +143,17 @@ public:
 
         int p = base_ + index;
         tree_[p] = value;
-        countUpdateVisit();
+#ifdef STRUCTA_ENABLE_COUNTERS
+        counters_.updateVisits++;
+#endif
 
         while (p > 1) {
-            p >>= 1;
+            p = p / 2;
             tree_[p] = ops_.merge(tree_[2 * p], tree_[2 * p + 1]);
-            countUpdateVisit();
-            countUpdateMerge();
+#ifdef STRUCTA_ENABLE_COUNTERS
+            counters_.updateVisits++;
+            counters_.updateMerges++;
+#endif
         }
     }
 
@@ -187,7 +163,7 @@ public:
         }
 
 #ifdef STRUCTA_ENABLE_COUNTERS
-        ++counters_.queryCalls;
+        counters_.queryCalls++;
 #endif
         if (l == r) {
             return ops_.identity();
@@ -196,52 +172,57 @@ public:
         Node leftResult = ops_.identity();
         Node rightResult = ops_.identity();
 
-        l += base_;
-        r += base_;
+        l = l + base_;
+        r = r + base_;
 
         while (l < r) {
-            if (l & 1) {
+            if (l % 2 == 1) {
                 leftResult = ops_.merge(leftResult, tree_[l]);
-                countQueryBlock();
-                countQueryMerge();
-                ++l;
+#ifdef STRUCTA_ENABLE_COUNTERS
+                counters_.queryBlocks++;
+                counters_.queryMerges++;
+#endif
+                l++;
             }
 
-            if (r & 1) {
-                --r;
+            if (r % 2 == 1) {
+                r--;
                 rightResult = ops_.merge(tree_[r], rightResult);
-                countQueryBlock();
-                countQueryMerge();
+#ifdef STRUCTA_ENABLE_COUNTERS
+                counters_.queryBlocks++;
+                counters_.queryMerges++;
+#endif
             }
 
-            l >>= 1;
-            r >>= 1;
+            l = l / 2;
+            r = r / 2;
         }
 
-        countQueryMerge();
+#ifdef STRUCTA_ENABLE_COUNTERS
+        counters_.queryMerges++;
+#endif
         return ops_.merge(leftResult, rightResult);
     }
 
     bool debugCheckAgainst(const std::vector<Node>& expected) const {
-        if (static_cast<int>(expected.size()) != n_) {
+        if ((int)expected.size() != n_) {
             return false;
         }
 
-        for (int i = 0; i < n_; ++i) {
+        for (int i = 0; i < n_; i++) {
             if (!(tree_[base_ + i] == expected[i])) {
                 return false;
             }
         }
 
-        for (int i = n_; i < base_; ++i) {
+        for (int i = n_; i < base_; i++) {
             if (!(tree_[base_ + i] == ops_.identity())) {
                 return false;
             }
         }
 
-        for (int p = base_ - 1; p >= 1; --p) {
-            const Node expectedParent =
-                ops_.merge(tree_[2 * p], tree_[2 * p + 1]);
+        for (int p = base_ - 1; p >= 1; p--) {
+            Node expectedParent = ops_.merge(tree_[2 * p], tree_[2 * p + 1]);
             if (!(tree_[p] == expectedParent)) {
                 return false;
             }
@@ -250,25 +231,25 @@ public:
         return true;
     }
 
-    SegmentTreeCounters counters() const noexcept {
+    SegmentTreeCounters counters() const {
         return counters_;
     }
 
-    std::uint64_t euclidRemainderSteps() const noexcept {
+    unsigned long long euclidRemainderSteps() const {
         return ops_.euclidRemainderSteps();
     }
 
-    void resetCounters() const noexcept {
-        counters_ = {};
+    void resetCounters() const {
+        counters_ = SegmentTreeCounters();
         ops_.resetCounters();
     }
 };
 
-inline GcdValue gcdMagnitude(long long value) noexcept {
+inline GcdValue gcdMagnitude(long long value) {
     if (value >= 0) {
-        return static_cast<GcdValue>(value);
+        return (GcdValue)value;
     }
-    return static_cast<GcdValue>(-(value + 1)) + 1ULL;
+    return (GcdValue)(-(value + 1)) + 1ULL;
 }
 
 }

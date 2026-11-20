@@ -1,6 +1,8 @@
 # D6 derivation review
 
-The current `D6-cost-model-draft.pdf` names Adi Jain and covers the segment tree, two-tree Fenwick, prefix baseline and array oracle. It is a draft: D1's current remote branch has no implementation, and the local D1 snapshot needs the owner's confirmation. B's counters are active in timed runs. The final comparison must be repeated after the team agrees on the release versions.
+20 November update: `REPORT.md` now includes reruns with the current D1 header and both counters disabled. B's local counter switch and the dated result folder resolve the earlier instrumentation mismatch for these new timings. The PDF still needs the author's final review and the team's release decision. Earlier review notes below describe the earlier runs.
+
+The current `D6-cost-model-draft.pdf` names Adi Jain and covers the segment tree, two-tree Fenwick, prefix baseline and array oracle. Its predictions can be compared with the observations in `REPORT.md`. The 20 November timing build disabled counters in both structures. The team still needs to confirm release revisions and D3's GCD proof before treating the comparison as final.
 
 Before submitting:
 

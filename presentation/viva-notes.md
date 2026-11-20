@@ -1,6 +1,8 @@
 # D6 speaking notes
 
-Use `D6-slide.pptx` as a draft for your part of the team presentation. The numbers are preliminary until D1 confirms the implementation and D2 provides a timing build without counters. Review the code and derivation yourself before presenting.
+20 November update: the latest counters-off timing table is at the start of `REPORT.md`, with raw data in `results/timing-2026-11-20/`. Earlier slides and the script below refer to their original runs. Do not combine those numbers with the new build. For the newer cache traces, quote 1,568 for A and 4,892 for B with a thread-ID filter; the stricter lifetime filter gives B=4,891. These recordings predate the counters-off change. The Canva deck and existing PPTX have not been edited in this update.
+
+The current counters-off timings are in `results/timing-2026-11-20/`; earlier runs remain in their dated folders. Use results from one run set at a time when presenting.
 
 ## Suggested 3-4 minute explanation
 
@@ -18,7 +20,7 @@ The chart shows the prefix baseline on 4,096 values, 10,000 operations, and a 50
 
 **Limits and conclusion (about 30 seconds)**
 
-The full-scale runs use one million values and one million operations, but A comes from an older unconfirmed snapshot. D1 needs to confirm the final version, and D2 needs a counters-off timing build for a fairer comparison. WPR recorded cache samples for both structures; the results are preliminary and include setup work. I would rerun the comparisons after integration.
+The 20 November full-scale timings use one million values and one million operations, with counters disabled for both structures. The 17 November WPR traces recorded 1,568 A and 4,892 B samples by thread ID; strict lifetime filtering gives B 4,891. Those sampled events include setup and construction and are not exact cache-miss totals or rates.
 
 ## Viva questions
 
@@ -27,6 +29,12 @@ Maximum has no inverse: knowing the maximum of two prefixes does not determine t
 
 **Why does the prefix tree rebuild after a decrease?**
 A stored block maximum may have come from the lowered element. The old maximum alone does not reveal the next largest value, so this baseline recomputes its blocks from the array.
+
+**How do I explain the main cost formulas?**
+For a segment tree, building is proportional to `n`, and each query or update visits at most a logarithmic number of levels. For the prefix baseline, each decrease rebuilds the structure, giving a term proportional to `n` times the number of decreases. An array query scans its range, so its total query work depends on the sum of the range widths. The two-tree Fenwick model includes the current constructor's block scans and the query and update work. These models predict work, not exact milliseconds.
+
+**What does the GCD bound mean?**
+The tree visits logarithmically many blocks, but each GCD calculation may take multiple remainder steps. A direct query bound is `O(log n log V)`. The tighter bound in the project requires a telescoping argument whose assumptions still need D3's confirmation; the benchmark counters do not prove it.
 
 **Why use the same seed?**
 The benchmark creates one workload and replays it for each structure. This gives both implementations the same initial values, query ranges and assignments. The seed records how the workload was generated; code revision and compiler details must be recorded too.
@@ -43,8 +51,8 @@ They are percentages of updates, not of all operations. Each selected update cha
 **Does the result prove one structure has better cache behavior?**
 No. WPR recorded sampled cache events, not exact miss totals or rates. The recordings include workload generation and construction, and there is only one trace for each structure.
 
-**Why are the A/B numbers preliminary?**
-The D1 branch was reset after the snapshot used for the experiments, and B updates counters during timing while A has its counters disabled. Both can affect the final comparison.
+**What limits the A/B timing comparison?**
+The 20 November build disables counters in both structures, but measurements came from an interactive Windows machine without controlled background load or thermal conditions. The team should identify the release revisions before treating these figures as final.
 
 **What do you own?**
 The D6 cost model, workload and benchmark harness, measurement and counter scripts, figures, and the comparison in the report. The data structures and oracle belong to the other team roles.
