@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WindowsPerformanceRecorder Version="1.0" Author="D6">
+  <Profiles>
+    <SystemCollector Id="Kernel" Name="NT Kernel Logger">
+      <BufferSize Value="64" />
+      <Buffers Value="128" />
+    </SystemCollector>
+    <SystemProvider Id="Provider">
+      <Keywords>
+        <Keyword Value="ProcessThread" />
+        <Keyword Value="Loader" />
+        <Keyword Value="PmcProfile" />
+      </Keywords>
+    </SystemProvider>
+    <HardwareCounter Id="Cache" Strict="true">
+      <SampledCounters>
+        <SampledCounter Value="CacheMisses" Interval="65536" />
+      </SampledCounters>
+    </HardwareCounter>
+    <Profile Id="Cache.Verbose.File" Name="Cache" Description="Sample cache-miss events" DetailLevel="Verbose" LoggingMode="File">
+      <Collectors>
+        <SystemCollectorId Value="Kernel">
+          <SystemProviderId Value="Provider" />
+          <HardwareCounterId Value="Cache" />
+        </SystemCollectorId>
+      </Collectors>
+    </Profile>
+  </Profiles>
+</WindowsPerformanceRecorder>

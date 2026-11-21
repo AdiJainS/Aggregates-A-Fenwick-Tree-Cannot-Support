@@ -1,0 +1,2 @@
+n,operations,width,update_percent,seed,queries,updates,query_blocks,query_merges,update_visits,update_merges,euclid_remainders,oracle_elements_if_scanned,checksum
+1000000,1000000,1,90,253,99885,900115,99885,199770,18902415,18002300,28164333,99885,3238643460342135036
