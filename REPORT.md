@@ -51,7 +51,7 @@ For D1, the pair for a sequence is its maximum and the number of occurrences of 
 
 More explicitly, for summaries $(m_1,c_1)$ and $(m_2,c_2)$, let $M=\max(m_1,m_2)$. Their merge is $(M,[m_1=M]c_1+[m_2=M]c_2)$. For any three summaries, either grouping produces the overall maximum and adds exactly the counts belonging to it. Thus the operation is associative and the empty summary is an identity. A range query repeatedly takes complete nodes from its left or right boundary; the selected nodes and the unprocessed middle partition the original interval. When the middle is empty, the ordered accumulators cover every requested element once. This proof works for any monoid, including a noncommutative one, because the implementation preserves order.
 
-![Figure 1. Segment tree example](report-images/figure-01.png)
+![Figure 1. Segment tree example](docs/report-images/figure-01.png)
 
 *Figure 1: Segment tree for readings [5, 2, 7, 4]. Each parent combines its children.*
 
@@ -63,11 +63,11 @@ For one-based internal index $i$, write lowbit$(i)$ for its lowest set bit. The 
 
 For an assignment, unaffected blocks retain their maxima. The update recomputes affected blocks using partial maxima from their unchanged parts and the new value, including when the old maximum is decreased. The D2 proof states the block invariant and gives the detailed walk-by-walk argument in <code>docs/derivations/D2-structureB-draft.md</code>. The bound concerns its counted algorithmic steps; it is not a claim that every update takes the same elapsed time.
 
-![Figure 2. Structure B covers a requested range by traversing blocks from both ends.](report-images/figure-02.png)
+![Figure 2. Structure B covers a requested range by traversing blocks from both ends.](docs/report-images/figure-02.png)
 
 *Figure 2: Structure B covers a requested range by traversing blocks from both ends.*
 
-![Figure 3. The same generated workload is replayed for A and B; manageable cases are checked against the oracle.](report-images/figure-03.png)
+![Figure 3. The same generated workload is replayed for A and B; manageable cases are checked against the oracle.](docs/report-images/figure-03.png)
 
 *Figure 3: The same generated workload is replayed for A and B; manageable cases are checked against the oracle.*
 
@@ -127,15 +127,15 @@ For width 1024 and 10% updates, B is faster in this set. The nine configurations
 
 In D5’s million-operation workloads, difficult queries took 76.12 ± 1.01 ms for A and 37.47 ± 0.53 ms for B. The interleaved decrease/query workload took 45.59 ± 0.09 ms for A and 84.92 ± 4.28 ms for B. Each workload was checked against its deterministic expected answers.
 
-![Figure 4. Replay time versus width, 10% updates.](report-images/figure-04.png)
+![Figure 4. Replay time versus width, 10% updates.](docs/report-images/figure-04.png)
 
 *Figure 4: Replay time versus width, 10% updates.*
 
-![Figure 5. Maximum replay time versus width, 50% updates.](report-images/figure-05.png)
+![Figure 5. Maximum replay time versus width, 50% updates.](docs/report-images/figure-05.png)
 
 *Figure 5: Maximum replay time versus width, 50% updates.*
 
-![Figure 6. Maximum replay time versus width, 90% updates.](report-images/figure-06.png)
+![Figure 6. Maximum replay time versus width, 90% updates.](docs/report-images/figure-06.png)
 
 *Figure 6: Maximum replay time versus width, 90% updates.*
 
@@ -143,17 +143,17 @@ In D5’s million-operation workloads, difficult queries took 76.12 ± 1.01 ms f
 
 The full decrease sweep covers three widths, three update shares and three requested decrease shares. At width 1024 and 50% updates, the 0%, 50% and 100% decrease cases took respectively 276.21 ± 19.36, 254.75 ± 5.04 and 251.89 ± 4.83 ms for A, and 381.21 ± 58.67, 372.38 ± 59.38 and 375.50 ± 57.00 ms for B. These are full replay times, not isolated decrease costs. B’s spread is large and the measurements do not establish a clear decrease-rate trend for B.
 
-![Figure 7. D5 adversarial workload replay timings; n = 1,048,576.](report-images/figure-07.png)
+![Figure 7. D5 adversarial workload replay timings; n = 1,048,576.](docs/report-images/figure-07.png)
 
 *Figure 7: D5 adversarial workload replay timings; $n=1{,}048{,}576$.*
 
-![Figure 8. Full-scale decrease sweep, width 1024 and 50% updates.](report-images/figure-08.png)
+![Figure 8. Full-scale decrease sweep, width 1024 and 50% updates.](docs/report-images/figure-08.png)
 
 *Figure 8: Full-scale decrease sweep, width 1024 and 50% updates.*
 
 The prefix baseline was measured at $n=4096$ with 10,000 operations and 50% updates. With 0, 2,532 and 5,051 actual decreases, replay time was respectively 0.23, 14.12 and 27.84 ms. The rising trend is consistent with the rebuild term, but one fixed-size experiment does not prove an asymptotic bound.
 
-![Figure 9. Prefix baseline replay versus decrease share.](report-images/figure-09.png)
+![Figure 9. Prefix baseline replay versus decrease share.](docs/report-images/figure-09.png)
 
 *Figure 9: Prefix baseline replay versus decrease share.*
 
@@ -161,15 +161,15 @@ The prefix baseline was measured at $n=4096$ with 10,000 operations and 50% upda
 
 The GCD benchmark used the D1 GCD tree and D4 array reference, with one million values and operations and seed 253. The following results are from the 17 November D1 update set, distinct from the 20 November maximum timings. Every entry is a five-run replay mean in milliseconds with sample standard deviation. The oracle was timed only at width 1; wider ranges were not timed against the array because scanning them is expensive. A dash denotes an unmeasured case, not zero time.
 
-![Figure 10. GCD replay versus width, 10% updates.](report-images/figure-10.png)
+![Figure 10. GCD replay versus width, 10% updates.](docs/report-images/figure-10.png)
 
 *Figure 10: GCD replay versus width, 10% updates.*
 
-![Figure 11. GCD replay versus width, 50% updates.](report-images/figure-11.png)
+![Figure 11. GCD replay versus width, 50% updates.](docs/report-images/figure-11.png)
 
 *Figure 11: GCD replay versus width, 50% updates.*
 
-![Figure 12. GCD replay versus width, 90% updates.](report-images/figure-12.png)
+![Figure 12. GCD replay versus width, 90% updates.](docs/report-images/figure-12.png)
 
 *Figure 12: GCD replay versus width, 90% updates.*
 
@@ -193,11 +193,11 @@ In the earlier separate GCD counter run at width 1024 and 50% updates, the tree 
 
 ## 8. Cache profiling and limitations
 
-Separate Windows Performance Recorder traces were examined for the benchmark process. The newer traces show 1,568 A samples and 4,892 B samples under the thread-ID filter; a stricter lifetime filter gives 4,891 for B. These are sampled events, not exact totals or miss rates. The traces include preparation, construction and 20 replays, use counters enabled for B, and differ in process duration. They do not explain the timing difference or establish a cache-performance ranking. Source hashes, filters and trace summaries are documented in <code>results/cache/README.md</code>.
+Separate Windows Performance Recorder traces were examined for the benchmark process. The newer traces show 1,568 A samples and 4,892 B samples under the thread-ID filter; a stricter lifetime filter gives 4,891 for B. These are sampled events, not exact totals or miss rates. The traces include preparation, construction and 20 replays, use counters enabled for B, and differ in process duration. They do not explain the timing difference or establish a cache-performance ranking. Source hashes, filters and trace summaries are documented in <code>results/raw/cache/README.md</code>.
 
 ## 9. Release status and reproducibility
 
-The benchmarked source revisions are documented with the raw CSVs and scripts in <code>results/timing-2026-11-20/</code>. Confirm the team’s final release revisions, integrate the architect’s reference application with agreed adapters, and rerun affected checks if code changes. The original derivations and tools declarations remain in their respective repository directories. Cache traces are ignored by Git; the summaries are committed. The 20 November runs retain observed spread and should not be presented as thermally controlled measurements.
+The benchmarked source revisions are documented with the raw CSVs and scripts in <code>results/raw/timing-2026-11-20/</code>. Confirm the team’s final release revisions, integrate the architect’s reference application with agreed adapters, and rerun affected checks if code changes. The original derivations and tools declarations remain in their respective repository directories. Cache traces are ignored by Git; the summaries are committed. The 20 November runs retain observed spread and should not be presented as thermally controlled measurements.
 
 The brief asks for all approaches across width and update mix. The committed GCD oracle timings cover width one; wider GCD cases measure the tree only. The array scan model predicts width-dependent work, but the available timings do not establish that trend experimentally. Complete the missing oracle measurements where feasible, or explicitly retain this limitation in the submission.
 
