@@ -6,3 +6,8 @@ build/
 /failure.txt
 /results/cache/*.etl
 __pycache__/
+# Windows compiled executables
+# C++ object files
+# Build folders
+/minimized_failure.txt
+/minimized_d2_failure.txt
