@@ -1,0 +1,3 @@
+structure,query_blocks,update_steps,changed_blocks,lowered_blocks,rebuilds,decrease_percent,actual_increases,actual_decreases,actual_unchanged
+segment_tree,20000000,0,,,,-1,0,0,0
+fenwick,39000000,0,0,0,,-1,0,0,0
