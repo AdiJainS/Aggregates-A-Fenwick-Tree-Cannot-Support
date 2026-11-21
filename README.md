@@ -49,7 +49,7 @@ Each `Q left right` line prints `maximum count gcd` over the half-open range `[l
 
     make test
 
-This builds and runs every unit test, invariant checker and differential test, then the sample check and the application's own `--test` (one million seeded operations, seed 253). The oracle tests use seed 42. A passing run ends with:
+This builds and runs every unit test, invariant checker and differential test, then the sample check and the application's own `--test` for both backends (one million seeded operations, seed 253). The oracle tests use seed 42. A passing run ends with:
 
     ALL TESTS PASSED
 
@@ -57,13 +57,13 @@ What the differential tests run:
 
 - Structure B against the array oracle: 1,000,000 operations (`oracle/test_scale_d2.cpp`, seed 42).
 - Structure A against the array oracle: 100,000 operations (`oracle/test_real_d1.cpp`, seed 42).
-- The application's segment tree: 1,000,000 operations (`bin/app --test`, seed 253).
+- The application, for each backend: 1,000,000 operations (`bin/app --backend=a --test` and `--backend=b-hybrid --test`, seed 253).
 
 ## Evaluation interface (hidden tests)
 
     ./bin/app < ops.txt > out.txt
 
-Input and output follow the sensor-replay format in `INTERFACE.md` (Part 2). Example input and its output are `app/sample.in` and `app/sample.out`. The instructor's published evaluation format for Project 05 has not been matched yet: there is no `--structure A|B` switch, and the application currently uses its own reference segment tree for both maximum and gcd. See Known limitations.
+Input and output follow the sensor-replay format in `INTERFACE.md` (Part 2). Example input and its output are `app/sample.in` and `app/sample.out`. The application uses the team's native structures through the shared interface in `include/`. `--backend=a` (default) uses Structure A; `--backend=b-hybrid` uses Structure B for the maximum and Structure A for the count and gcd, because B does not provide them. The instructor's published evaluation format for Project 05 has not been matched yet: there is no `run_ops --structure A|B` binary. See Known limitations.
 
 ## Benchmarks and figures
 
@@ -75,7 +75,7 @@ This builds, runs the tests and the sample, and regenerates the figures in `resu
 
 | Path | Contents |
 | --- | --- |
-| `include/` | Shared `Operation` type |
+| `include/` | Shared `Operation` type, the shared A/B interface and adapters, the sensor replay header |
 | `src/structA/` | Segment tree, maximum/count and gcd wrappers (Structure A) |
 | `src/structB/` | Two-array Fenwick maximum and the prefix-only baseline (Structure B) |
 | `app/` | Sensor replay application, sample input and output |
@@ -106,7 +106,7 @@ The prefix-only baseline (n = 4096, 10,000 operations, 50% updates) took 0.23, 1
 
 ## Known limitations
 
-- No `run_ops --structure A|B` evaluation binary yet. `bin/app` uses its own reference segment tree and is not wired to `src/structA/` or `src/structB/`.
+- No `run_ops --structure A|B` evaluation binary yet. `bin/app` has `--backend=a` and `--backend=b-hybrid` but the hybrid is not a pure-B aggregate implementation, since B has no count or gcd.
 - The Structure A differential test runs 100,000 operations, not 10^6.
 - The timing data was recorded on a Windows machine without background-load control. Some configurations have large spread. The cache profiling uses Windows tracing tools and is sampled, not exact miss counts.
 - Structure B's build scans its blocks and has an O(n log n) upper bound, whereas the paper describes a linear build.

@@ -31,7 +31,7 @@ What each member built, with links to main commits (pull requests are listed in 
 
 ## 2. Problem
 
-The application stores sensor readings and calibration values and processes point assignments and range queries. The architect’s interface uses zero-based half-open ranges $[l,r)$, with $0 \le l \le r \le n$. A query returns the maximum reading, its count, and the GCD of calibration values. Empty queries return $(-1,0,0)$ under the application’s nonnegative input contract. The application accepts separate reading and calibration fields. The architect’s current application has a standalone reference segment-tree backend; adapters connecting the final team structures remain an integration task. Structure B promises a maximum only, so a hybrid implementation must identify how it supplies count and GCD.
+The application stores sensor readings and calibration values and processes point assignments and range queries. The architect’s interface uses zero-based half-open ranges $[l,r)$, with $0 \le l \le r \le n$. A query returns the maximum reading, its count, and the GCD of calibration values. Empty queries return $(-1,0,0)$ under the application’s nonnegative input contract. The application accepts separate reading and calibration fields. The application now uses the native structures through the shared adapters in `include/`. Structure B promises a maximum only, so a hybrid implementation must identify how it supplies count and GCD.
 
 Scale: one million values and one million operations (n up to 1,048,576 for the D5 workloads), as required by the project document.
 
@@ -105,7 +105,7 @@ The differential tests are run by `make test`:
 | --- | ---: | ---: | --- |
 | Structure B against the oracle (`oracle/test_scale_d2.cpp`) | 1,000,000 | 42 | PASS, 0 mismatches |
 | Structure A against the oracle (`oracle/test_real_d1.cpp`) | 100,000 | 42 | PASS |
-| Application segment tree (`bin/app --test`) | 1,000,000 | 253 | PASS |
+| Application, both backends (`bin/app --backend=a --test`, `--backend=b-hybrid --test`) | 1,000,000 each | 253 | PASS |
 | Shrinker demonstration (`oracle/test_shrink_real_d2.cpp`) | injected fault, 5 operations reduced to 2 | — | detected |
 
 ### 7.1 Bug log
@@ -243,11 +243,11 @@ Separate Windows Performance Recorder traces were examined for the benchmark pro
 
 ## 12. Limitations
 
-The benchmarked source revisions are documented with the raw CSVs and scripts in <code>results/raw/timing-2026-11-20/</code>. Confirm the team’s final release revisions, integrate the architect’s reference application with agreed adapters, and rerun affected checks if code changes. The original derivations and tools declarations remain in their respective repository directories. Cache traces are ignored by Git; the summaries are committed. The 20 November runs retain observed spread and should not be presented as thermally controlled measurements.
+The benchmarked source revisions are documented with the raw CSVs and scripts in <code>results/raw/timing-2026-11-20/</code>. Confirm the team’s final release revisions, rerun affected checks if code changes. The original derivations and tools declarations remain in their respective repository directories. Cache traces are ignored by Git; the summaries are committed. The 20 November runs retain observed spread and should not be presented as thermally controlled measurements.
 
 The brief asks for all approaches across width and update mix. The committed GCD oracle timings cover width one; wider GCD cases measure the tree only. The array scan model predicts width-dependent work, but the available timings do not establish that trend experimentally. Complete the missing oracle measurements where feasible, or explicitly retain this limitation in the submission.
 
-Other limitations: the application `bin/app` is not wired to `src/structA/` or `src/structB/`; there is no `--structure A|B` evaluation binary; the Structure A differential test runs 100,000 operations instead of 10^6; `REPORT.pdf` and `docs/slides/slides.pdf` are not yet exported or committed. Next measurements: rerun everything on one machine with counters off for both structures, add the array oracle at wider ranges, and take cache measurements with the same code and settings.
+Other limitations: `bin/app` runs on the native structures (`--backend=a` or `--backend=b-hybrid`), but the hybrid takes count and gcd from A because B does not provide them; there is no `run_ops --structure A|B` evaluation binary; the Structure A differential test runs 100,000 operations instead of 10^6; `REPORT.pdf` and `docs/slides/slides.pdf` are not yet exported or committed. Next measurements: rerun everything on one machine with counters off for both structures, add the array oracle at wider ranges, and take cache measurements with the same code and settings.
 
 ## 13. References
 

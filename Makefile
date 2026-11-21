@@ -2,7 +2,7 @@ CXX ?= c++
 CXXFLAGS ?= -std=c++17 -O2 -Wall
 INC = -Iinclude -Isrc/structA -Isrc/structB -Ioracle -Iadversary
 
-UNIT_SRC = $(wildcard tests/structA/test_*.cpp) $(wildcard tests/structB/test_*.cpp) $(wildcard tests/adversary/test_*.cpp)
+UNIT_SRC = $(wildcard tests/structA/test_*.cpp) $(wildcard tests/structB/test_*.cpp) $(wildcard tests/adversary/test_*.cpp) $(wildcard app/test_*.cpp)
 ORACLE_SRC = oracle/oracle_test.cpp oracle/generator_test.cpp oracle/gcd_reference_test.cpp oracle/differential_test.cpp oracle/test_real_d1.cpp oracle/test_real_d2.cpp oracle/test_scale_d2.cpp oracle/test_shrink_real_d2.cpp
 
 UNIT_BIN = $(patsubst %.cpp,build/%,$(UNIT_SRC))
@@ -41,8 +41,10 @@ test: bin/app $(UNIT_BIN) $(ORACLE_BIN)
 	for t in $(UNIT_BIN) $(ORACLE_BIN); do \
 		echo "== $$t"; ./$$t > /dev/null; \
 	done; \
-	echo "== app sample"; ./bin/app < app/sample.in | diff - app/sample.out; \
-	echo "== app --test"; ./bin/app --test > /dev/null; \
+	for b in a b-hybrid; do \
+		echo "== app --backend=$$b sample"; ./bin/app --backend=$$b < app/sample.in | diff - app/sample.out; \
+		echo "== app --backend=$$b --test"; ./bin/app --backend=$$b --test > /dev/null; \
+	done; \
 	echo "ALL TESTS PASSED"
 
 clean:
