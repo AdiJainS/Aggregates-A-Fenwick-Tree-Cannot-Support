@@ -3,7 +3,7 @@ CXXFLAGS ?= -std=c++17 -O2 -Wall
 INC = -Iinclude -Isrc/structA -Isrc/structB -Ioracle -Iadversary
 
 UNIT_SRC = $(wildcard tests/structA/test_*.cpp) $(wildcard tests/structB/test_*.cpp) $(wildcard tests/adversary/test_*.cpp) $(wildcard app/test_*.cpp)
-ORACLE_SRC = oracle/oracle_test.cpp oracle/generator_test.cpp oracle/gcd_reference_test.cpp oracle/differential_test.cpp oracle/test_real_d1.cpp oracle/test_real_d2.cpp oracle/test_scale_d2.cpp oracle/test_shrink_real_d2.cpp
+ORACLE_SRC = $(wildcard tests/*.cpp)
 
 UNIT_BIN = $(patsubst %.cpp,build/%,$(UNIT_SRC))
 ORACLE_BIN = $(patsubst %.cpp,build/%,$(ORACLE_SRC))

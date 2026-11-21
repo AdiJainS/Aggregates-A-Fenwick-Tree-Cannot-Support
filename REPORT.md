@@ -41,7 +41,7 @@ The full text is in [INTERFACE.md](INTERFACE.md). Part 1 lists the structure int
 
 Invariants checked by tests:
 
-1. Every query equals the plain-array answer after any sequence of assignments (`oracle/`).
+1. Every query equals the plain-array answer after any sequence of assignments (`oracle/`, `tests/differential_test.cpp`).
 2. Structure A: every parent equals the merge of its children; padding leaves are identities (`tests/structA/test_invariants.cpp`).
 3. Structure B: every stored block equals the true maximum of its block, including after a decrease; the fast assignment leaves the same blocks as a fresh build (`tests/structB/test_blocks.cpp`).
 4. Structure B: a query visits at most 2·⌊log₂ n⌋+1 blocks and an assignment takes at most 4(⌊log₂ n⌋+1) steps (`tests/structB/test_counters.cpp`).
@@ -103,10 +103,10 @@ The differential tests are run by `make test`:
 
 | Test | Operations | Seed | Result |
 | --- | ---: | ---: | --- |
-| Structure B against the oracle (`oracle/test_scale_d2.cpp`) | 1,000,000 | 42 | PASS, 0 mismatches |
-| Structure A against the oracle (`oracle/test_real_d1.cpp`) | 100,000 | 42 | PASS |
+| Structure B against the oracle (`tests/test_scale_d2.cpp`) | 1,000,000 | 42 | PASS, 0 mismatches |
+| Structure A against the oracle (`tests/test_real_d1.cpp`) | 100,000 | 42 | PASS |
 | Application, both backends (`bin/app --backend=a --test`, `--backend=b-hybrid --test`) | 1,000,000 each | 253 | PASS |
-| Shrinker demonstration (`oracle/test_shrink_real_d2.cpp`) | injected fault, 5 operations reduced to 2 | — | detected |
+| Shrinker demonstration (`tests/test_shrink_real_d2.cpp`) | injected fault, 5 operations reduced to 2 | — | detected |
 
 ### 7.1 Bug log
 

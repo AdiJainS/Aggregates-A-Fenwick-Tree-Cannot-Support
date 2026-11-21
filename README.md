@@ -9,7 +9,7 @@ Team: Quorum — CS 253 / MA 253, 2026
 | Tia Mehra | 250041039 | @Tia-917 | Structure A owner | `src/structA/` | D1 |
 | Vishruth Agrawal | 250001078 | @Vishruth-create | Structure B owner | `src/structB/` | D2 |
 | Anushri Maheshwari | 250041005 | @Apples-17 | Architect | `app/`, `include/`, `INTERFACE.md` | D3 |
-| Sushmita Patil | 250001069 | @psush29 | Oracle owner | `oracle/` | D4 |
+| Sushmita Patil | 250001069 | @psush29 | Oracle owner | `oracle/`, differential tests in `tests/` | D4 |
 | Vanshika Agrawal | 250001076 | @vanshi040907 | Adversary | `adversary/` | D5 |
 | Adi Jain | 250001083 | @AdiJainS | Analyst | `bench/` | D6 |
 
@@ -55,8 +55,8 @@ This builds and runs every unit test, invariant checker and differential test, t
 
 What the differential tests run:
 
-- Structure B against the array oracle: 1,000,000 operations (`oracle/test_scale_d2.cpp`, seed 42).
-- Structure A against the array oracle: 100,000 operations (`oracle/test_real_d1.cpp`, seed 42).
+- Structure B against the array oracle: 1,000,000 operations (`tests/test_scale_d2.cpp`, seed 42).
+- Structure A against the array oracle: 100,000 operations (`tests/test_real_d1.cpp`, seed 42).
 - The application, for each backend: 1,000,000 operations (`bin/app --backend=a --test` and `--backend=b-hybrid --test`, seed 253).
 
 ## Evaluation interface (hidden tests)
@@ -79,10 +79,10 @@ This builds, runs the tests and the sample, and regenerates the figures in `resu
 | `src/structA/` | Segment tree, maximum/count and gcd wrappers (Structure A) |
 | `src/structB/` | Two-array Fenwick maximum and the prefix-only baseline (Structure B) |
 | `app/` | Sensor replay application, sample input and output |
-| `oracle/` | Array oracle, operation generator, gcd reference, differential tests |
+| `oracle/` | Array oracle, operation generator, gcd reference (headers) |
 | `adversary/` | Adversarial workload generators and analysis |
 | `bench/` | Benchmark harness, counters, plotting and summary scripts |
-| `tests/` | Unit tests and invariant checks for A, B and the adversary |
+| `tests/` | Unit tests and invariant checks for A, B and the adversary; the oracle owner's differential tests are directly in `tests/` |
 | `scripts/` | `run_all.sh` |
 | `results/raw/` | Raw CSV logs and check outputs |
 | `results/figures/` | Figures generated from `results/raw/` |
