@@ -59,11 +59,37 @@ What the differential tests run:
 - Structure A against the array oracle: 100,000 operations (`tests/test_real_d1.cpp`, seed 42).
 - The application, for each backend: 1,000,000 operations (`bin/app --backend=a --test` and `--backend=b-hybrid --test`, seed 253).
 
-## Evaluation interface (hidden tests)
+## Evaluation interface (pending instructor specification)
 
-    ./bin/app < ops.txt > out.txt
+The instructor has not yet published the official operation format. The evaluation runner is therefore **pending**: there is no `app/run_ops.cpp` or `bin/run_ops` yet, and the sensor replay is not claimed to satisfy the hidden-test protocol.
 
-Input and output follow the sensor-replay format in `INTERFACE.md` (Part 2). Example input and its output are `app/sample.in` and `app/sample.out`. The application uses the team's native structures through the shared interface in `include/`. `--backend=a` (default) uses Structure A; `--backend=b-hybrid` uses Structure B for the maximum and Structure A for the count and gcd, because B does not provide them. The instructor's published evaluation format for Project 05 has not been matched yet: there is no `run_ops --structure A|B` binary. See Known limitations.
+Once the format is released, implement `app/run_ops.cpp` over the shared adapters in `include/`, add a Makefile target producing `bin/run_ops`, and support these required selector forms:
+
+```text
+./bin/run_ops --structure A
+./bin/run_ops --structure B
+```
+
+Before calling it complete, match the instructor's operation syntax, indexing, value limits, output and error rules; add the published examples as fixtures; and test the requested capabilities against the oracle. B currently supports maximum only: count/gcd must follow the official specification, without silently substituting a hybrid.
+
+For the **existing local sensor replay**, use:
+
+    ./bin/app --backend=a < app/sample.in
+    ./bin/app --backend=b-hybrid < app/sample.in
+
+These commands follow the local format in `INTERFACE.md`, section 4; sample output is `app/sample.out`. The hybrid takes maximum from B and count/gcd from A and is not the planned pure-B evaluation selection.
+
+## D3 derivation
+
+The D3 proof is `docs/derivations/D3_250041005.pdf`: two pages, with Anushri Maheshwari's name and roll number 250041005. Its editable LaTeX source is `docs/derivations/sources/D3-latex/main.tex`.
+
+To rebuild it with Tectonic (optional; not required for the C++ build):
+
+```sh
+mkdir -p build/d3-proof
+tectonic --outdir build/d3-proof docs/derivations/sources/D3-latex/main.tex
+cp build/d3-proof/main.pdf docs/derivations/D3_250041005.pdf
+```
 
 ## Benchmarks and figures
 
@@ -106,7 +132,7 @@ The prefix-only baseline (n = 4096, 10,000 operations, 50% updates) took 0.23, 1
 
 ## Known limitations
 
-- No `run_ops --structure A|B` evaluation binary yet. `bin/app` has `--backend=a` and `--backend=b-hybrid` but the hybrid is not a pure-B aggregate implementation, since B has no count or gcd.
+- The official evaluation format is not published; `app/run_ops.cpp` and `./bin/run_ops --structure A|B` remain pending. `bin/app` has `--backend=a` and `--backend=b-hybrid` but the hybrid is not a pure-B aggregate implementation, since B has no count or gcd.
 - The Structure A differential test runs 100,000 operations, not 10^6.
 - The timing data was recorded on a Windows machine without background-load control. Some configurations have large spread. The cache profiling uses Windows tracing tools and is sampled, not exact miss counts.
 - Structure B's build scans its blocks and has an O(n log n) upper bound, whereas the paper describes a linear build.

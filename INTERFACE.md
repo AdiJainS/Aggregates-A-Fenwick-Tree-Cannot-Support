@@ -100,6 +100,6 @@ The gcd bound counts Euclidean remainder steps plus traversal. It is a time boun
 
 ## 6. Instructor evaluation entry point
 
-No instructor-supplied `run_ops` input/output format is present in this repository at this revision. The existing sensor replay format above is not asserted to be the examiner's format. There is no placeholder `run_ops` binary claiming compliance.
+The instructor has not yet published the official `run_ops` input/output format (confirmed by the Architect). The existing sensor replay format above is not asserted to be the examiner's format. There is no placeholder `run_ops` binary claiming compliance.
 
-When the official format is provided, add `app/run_ops.cpp` as its parser/serializer over the shared adapters, map its index convention explicitly, implement exactly its specified capabilities, add official fixtures, and build the required `run_ops` binary. Unsupported B count/gcd requests must be handled according to that format rather than fabricated or silently supplied by A.
+When the official format is provided, add `app/run_ops.cpp` as its parser/serializer over the shared adapters, map its index convention explicitly, implement exactly its specified capabilities, add official fixtures, add the Makefile target for `bin/run_ops`, and support `./bin/run_ops --structure A` and `./bin/run_ops --structure B`. Unsupported B count/gcd requests must be handled according to that format rather than fabricated or silently supplied by A.
