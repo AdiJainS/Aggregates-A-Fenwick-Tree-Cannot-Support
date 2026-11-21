@@ -105,7 +105,7 @@ private:
     mutable SegmentTreeCounters counters_; //mutable allows these counters to be modified inside const member functions
 
 public://Makes the following functions accessible outside the class.
-    SegmentTree() {} //Constructor, Creates an empty Segment Tree
+    SegmentTree() { tree_.assign(2, ops_.identity()); } //Constructor, Creates an empty Segment Tree
 
     SegmentTree(const std::vector<Node>& values) {//Defines another constructor that accepts an input vector by constant reference.
         build(values);
@@ -226,8 +226,9 @@ public://Makes the following functions accessible outside the class.
             }
         }
 
+        Ops checkOps = ops_;
         for (int p = base_ - 1; p >= 1; p--) {
-            Node expectedParent = ops_.merge(tree_[2 * p], tree_[2 * p + 1]);
+            Node expectedParent = checkOps.merge(tree_[2 * p], tree_[2 * p + 1]);
             if (!(tree_[p] == expectedParent)) {
                 return false;
             }
