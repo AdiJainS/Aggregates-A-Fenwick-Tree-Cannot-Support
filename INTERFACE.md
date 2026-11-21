@@ -1,4 +1,32 @@
-# Architect interface and invariants
+# Interface and invariants
+
+Project 5, Architect (D3, Anushri Maheshwari). The first part lists the common interface of the structures as the code in `src/` and `include/` implements it today. The second part is the architect's contract for the sensor-replay application in `app/`.
+
+## Part 1: Common structure interface
+
+All structures are built from an array of `long long` values, support point assignment, and answer range queries on a zero-based index.
+
+| Operation | Structure A (`StructureA`, `src/structA/`) | Structure B (`FenwickMax`, `src/structB/`) | Baseline (`PrefixFenwickMax`, `src/structB/`) |
+| --- | --- | --- | --- |
+| Build | `StructureA(values)` | `FenwickMax(values)` | `PrefixFenwickMax(values)` |
+| Assign | `assign(index, value)` | `assign(index, value)` | rebuilds the tree on a decrease |
+| Maximum query | `queryMax(l, r)` returns maximum and count | `queryMax(l, r)` returns the maximum only | prefix queries only |
+| Gcd query | `queryGCD(l, r)` | not supported | not supported |
+| Query range | half-open `[l, r)` | inclusive `[l, r]` | prefix `[0, r]` |
+
+Shared types live in `include/`. `include/operations.hpp` defines `Operation` (`ASSIGN`, `QUERY_MAX`, `QUERY_GCD`, with fields `l`, `r`, `value`), which the oracle, the generators and the benchmarks all use. Its `l` and `r` are inclusive for the maximum oracle. The gcd reference in `oracle/gcd_reference.hpp` uses half-open ranges like Structure A.
+
+The two range conventions differ. The benchmark harness converts between them at the boundary (see `bench/max_benchmark.cpp`). Any new code that calls both structures must do the same.
+
+Shared invariants, each checked in `tests/` or `oracle/`:
+
+1. After any sequence of assignments, every query returns what a plain array scan returns (`oracle/differential_test.cpp`, `oracle/test_real_d1.cpp`, `oracle/test_scale_d2.cpp`).
+2. Structure A: each internal node equals the merge of its two children; padding leaves hold the identity (`tests/structA/test_invariants.cpp`).
+3. Structure B: each stored block value equals the true maximum of its block after every assignment, including a decrease. A fast `assign` leaves the same blocks as a fresh build (`tests/structB/test_blocks.cpp`).
+4. Structure B: one query visits at most `2*floor(log2 n)+1` blocks and one assignment takes at most `4*(floor(log2 n)+1)` steps (`tests/structB/test_counters.cpp`).
+5. The prefix baseline returns correct prefix maxima after a decrease only because it rebuilds (`tests/adversary/test_adversary.cpp`).
+
+## Part 2: Sensor replay application contract
 
 Author: Anushri Maheshwari. Project 5, D3 Architect.
 
