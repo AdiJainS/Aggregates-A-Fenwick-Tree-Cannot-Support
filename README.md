@@ -27,7 +27,7 @@ A standard Fenwick tree can obtain a range sum by subtracting two prefix sums. T
 6. **Measure.** D6 generates seeded workloads, checks manageable cases, measures construction and replay separately, and collects counters in separate runs. CSVs and plots are in `results/`.
 7. **Compare with predictions.** [REPORT.md](REPORT.md) describes the measurements and their limits; `docs/derivations/` contains the mathematical work for each role.
 
-The runnable application in `D3/` currently uses the architect's **reference segment-tree backend**. It does not yet select between the D1 and D2 implementations. Structure B implements range maximum; it does not by itself provide maximum counts or GCD. The A/B comparison is run through the separate benchmark harness in `bench/`.
+The runnable application in `app/` currently uses the architect's **reference segment-tree backend**. It does not yet select between the D1 and D2 implementations. Structure B implements range maximum; it does not by itself provide maximum counts or GCD. The A/B comparison is run through the separate benchmark harness in `bench/`.
 
 ## Requirements
 
@@ -35,7 +35,7 @@ The runnable application in `D3/` currently uses the architect's **reference seg
 - Python 3 for benchmark scripts. Matplotlib is needed only to generate plots: `python -m pip install matplotlib`.
 - Windows Performance Recorder and Windows Performance Analyzer are optional, for cache profiling.
 
-Commands below use **Windows PowerShell** from the repository root. On Linux or macOS, use a C++17 compiler and normal shell input redirection; [D3/README.md](D3/README.md) contains Unix examples.
+Commands below use **Windows PowerShell** from the repository root. On Linux or macOS, use a C++17 compiler and normal shell input redirection; [app/README.md](app/README.md) contains Unix examples.
 
 ## 1. Get the project
 
@@ -50,11 +50,11 @@ Check that `g++ --version` and `python --version` work. Substitute another C++17
 
 ```powershell
 New-Item -ItemType Directory -Force .bench-deps | Out-Null
-g++ -std=c++17 -O2 D3/gcd_segment_tree.cpp -o .bench-deps/sensor-replay.exe
-Get-Content D3/sample.in | .\.bench-deps\sensor-replay.exe
+g++ -std=c++17 -O2 app/gcd_segment_tree.cpp -o .bench-deps/sensor-replay.exe
+Get-Content app/sample.in | .\.bench-deps\sensor-replay.exe
 ```
 
-The output should match [D3/sample.out](D3/sample.out):
+The output should match [app/sample.out](app/sample.out):
 
 ```text
 30 2 6
@@ -93,7 +93,7 @@ g++ -std=c++17 -O2 src/structA/test_update.cpp -o .bench-deps/test-a-update.exe
 .\.bench-deps\test-a-update.exe
 ```
 
-Other tests are alongside their modules in `src/structA/`, `src/structB/`, `oracle/` and `adversary/`. On a Unix-like shell, `sh D3/run_checks.sh` builds the application, checks the sample, runs `--test` and runs the larger `--scale` smoke test. The scale test checks sampled answers, not every full-scale query.
+Other tests are alongside their modules in `src/structA/`, `src/structB/`, `oracle/` and `adversary/`. On a Unix-like shell, `sh app/run_checks.sh` builds the application, checks the sample, runs `--test` and runs the larger `--scale` smoke test. The scale test checks sampled answers, not every full-scale query.
 
 ## 4. Build and run the maximum benchmark
 
@@ -129,7 +129,7 @@ The timing build disables counters for both structures; counter runs use a diffe
 | --- | --- |
 | `src/structA/` | Segment tree, maximum/count and GCD wrappers, and tests |
 | `src/structB/` | Two-tree and prefix-only Fenwick maximum implementations and tests |
-| `D3/` | Sensor replay reference application and sample input/output |
+| `app/` | Sensor replay reference application and sample input/output |
 | `oracle/` | Array oracle, operation generator and differential tests |
 | `adversary/` | Adversarial workload generators, analysis and checks |
 | `bench/` | Benchmark harnesses and plotting/summarizing scripts |

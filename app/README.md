@@ -5,14 +5,14 @@ Author: Anushri Maheshwari
 Build and run from the repository root:
 
 ```sh
-c++ -std=c++17 -O2 -Wall -Wextra -pedantic D3/gcd_segment_tree.cpp -o /tmp/sensor-replay
-/tmp/sensor-replay < D3/sample.in
+c++ -std=c++17 -O2 -Wall -Wextra -pedantic app/gcd_segment_tree.cpp -o /tmp/sensor-replay
+/tmp/sensor-replay < app/sample.in
 ```
 
 Run all local checks in one command:
 
 ```sh
-sh D3/run_checks.sh
+sh app/run_checks.sh
 ```
 
 Queries use zero-based [left,right): left included, right excluded. Input begins with n and the operation count, followed by n reading/calibration pairs. Use `U index reading calibration` to replace a sensor and `Q left right` to print maximum, its count, and the calibration gcd. An empty query prints `-1 0 0`. See the root INTERFACE.md for the full contract.
