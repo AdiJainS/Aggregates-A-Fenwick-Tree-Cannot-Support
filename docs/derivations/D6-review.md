@@ -1,5 +1,7 @@
 # D6 derivation review
 
+The prefix-baseline derivation and the 20 November measured check are in `D6-prefix-cost-model.pdf`; regenerate it from `make_d6_pdf.py` at the repository root. The earlier draft and pre-measurement planning notes are retained. Adi should review the PDF before submission. The team still needs to select release revisions and confirm the separate D3 GCD proof.
+
 20 November update: `REPORT.md` now includes reruns with the current D1 header and both counters disabled. B's local counter switch and the dated result folder resolve the earlier instrumentation mismatch for these new timings. The PDF still needs the author's final review and the team's release decision. Earlier review notes below describe the earlier runs.
 
 The current `D6-cost-model-draft.pdf` names Adi Jain and covers the segment tree, two-tree Fenwick, prefix baseline and array oracle. Its predictions can be compared with the observations in `REPORT.md`. The 20 November timing build disabled counters in both structures. The team still needs to confirm release revisions and D3's GCD proof before treating the comparison as final.
@@ -11,5 +13,5 @@ Before submitting:
 - Explain why each decrease in the prefix baseline causes a rebuild and why the resulting workload term is proportional to `n` times the number of decreases.
 - For GCD, state whether a count means tree blocks or Euclidean remainders. The tighter telescoping proof is D3's derivation; confirm its assumptions with the architect. The planning draft includes the updated build, query and update remainder-step terms.
 - D2's `changedBlocks` and `loweredBlocks` count changes in stored values; they are not a count of every operation performed. Do not add those counts to other counters as if the work were disjoint.
-- Replace the draft with a final authored PDF after confirming the team code and final results. Keep the original pre-measurement planning commit in the repository history. Do not describe a post-measurement adjustment as an original prediction.
+- Review the prefix PDF and confirm the release revisions. Keep the original pre-measurement planning commit in the repository history. Do not describe a post-measurement adjustment as an original prediction.
 - Review all code and recorded tool use before submission, and be ready to explain your own work.
