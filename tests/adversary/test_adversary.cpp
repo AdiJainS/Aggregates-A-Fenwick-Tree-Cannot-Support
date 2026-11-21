@@ -2,8 +2,8 @@
 #include <vector>
 
 #include "generators.hpp"
-#include "../src/structB/fenwick_max.hpp"
-#include "../src/structB/prefix_fenwick_max.hpp"
+#include "../../src/structB/fenwick_max.hpp"
+#include "../../src/structB/prefix_fenwick_max.hpp"
 
 using namespace std;
 

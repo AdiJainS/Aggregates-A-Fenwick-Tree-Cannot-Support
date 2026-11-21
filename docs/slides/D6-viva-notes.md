@@ -1,8 +1,8 @@
 # D6 speaking notes
 
-20 November update: the latest counters-off timing table is at the start of `REPORT.md`, with raw data in `results/timing-2026-11-20/`. Earlier slides and the script below refer to their original runs. Do not combine those numbers with the new build. For the newer cache traces, quote 1,568 for A and 4,892 for B with a thread-ID filter; the stricter lifetime filter gives B=4,891. These recordings predate the counters-off change. The Canva deck and existing PPTX have not been edited in this update.
+20 November update: the latest counters-off timing table is at the start of `REPORT.md`, with raw data in `results/raw/timing-2026-11-20/`. Earlier slides and the script below refer to their original runs. Do not combine those numbers with the new build. For the newer cache traces, quote 1,568 for A and 4,892 for B with a thread-ID filter; the stricter lifetime filter gives B=4,891. These recordings predate the counters-off change. The Canva deck and existing PPTX have not been edited in this update.
 
-The current counters-off timings are in `results/timing-2026-11-20/`; earlier runs remain in their dated folders. Use results from one run set at a time when presenting.
+The current counters-off timings are in `results/raw/timing-2026-11-20/`; earlier runs remain in their dated folders. Use results from one run set at a time when presenting.
 
 ## Suggested 3-4 minute explanation
 

@@ -17,7 +17,7 @@ The benchmark process lifetimes were about 3.79 seconds for A and 4.75 seconds f
 
 ```powershell
 tracerpt results\cache\b-current-2026-11-17.etl -o .bench-deps\b-current-events.csv -of CSV -y
-python bench/cache_samples.py .bench-deps/b-current-events.csv results/cache/b-current-2026-11-17.etl
+python bench/cache_samples.py .bench-deps/b-current-events.csv results/raw/cache/b-current-2026-11-17.etl
 ```
 
 The script selects `max_benchmark_cache_current.exe` by default. Use `--process` for an executable with another name.

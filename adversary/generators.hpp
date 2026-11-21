@@ -3,7 +3,7 @@
 #include <stdexcept>
 #include <vector>
 
-#include "../oracle/operations.hpp"
+#include "operations.hpp"
 
 // A workload contains starting values and operations.
 struct Workload {

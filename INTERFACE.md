@@ -96,7 +96,7 @@ The sensor wrapper's invariants are that A's reading view, optional B reading vi
 
 Let H=1+log2(n+1), L=1+log2(V+1), and V bound all calibration/gcd magnitudes throughout the replay. Both backends use O(n) storage. A construction has the safe bound O(nL), A maximum/count queries cost O(H), and gcd queries cost O(H+L) by Euclidean telescoping; A assignments retain the safe O(HL) bound. B's current construction scans its lowbit blocks, costing O(nH); its maximum queries and current assignments cost O(H). The constant-time abstract-call overhead does not alter these bounds.
 
-The gcd bound counts Euclidean remainder steps plus traversal. It is a time bound on a word RAM only when values and indices fit machine words and division/remainder is constant-cost. It is not a bit-complexity claim for arbitrary-precision integers. The `b-hybrid` full query includes A's count query and calibration gcd query and therefore costs O(H+L); a hybrid assignment includes A's update work and retains O(HL). Debug audits and test-oracle scans are excluded from these production-operation bounds. See `docs/derivations/D3-architect.pdf` for the proof.
+The gcd bound counts Euclidean remainder steps plus traversal. It is a time bound on a word RAM only when values and indices fit machine words and division/remainder is constant-cost. It is not a bit-complexity claim for arbitrary-precision integers. The `b-hybrid` full query includes A's count query and calibration gcd query and therefore costs O(H+L); a hybrid assignment includes A's update work and retains O(HL). Debug audits and test-oracle scans are excluded from these production-operation bounds. See `docs/derivations/D3_250041005.pdf` for the proof.
 
 ## 6. Instructor evaluation entry point
 

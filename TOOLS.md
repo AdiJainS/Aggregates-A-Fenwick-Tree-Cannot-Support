@@ -1,80 +1,21 @@
-# TOOLS.md
+# Tools used
 
-## D6: Analyst
+Every AI assistant, code generator and other significant tool the team used. Test results quoted anywhere in the repository come from compiling and running the code locally.
 
-| Tool | Work |
-| --- | --- |
-| Codex (OpenAI) | Expanded the cost estimates and references. |
-| Codex (OpenAI) | Helped create the GCD benchmark and build instructions. |
-| Codex (OpenAI) | Helped draft the cost model and derivation. |
-| Codex (OpenAI) | Helped with the maximum benchmark, integration, result summaries and plots. |
-| Codex (OpenAI) | Helped set up cache profiling and draft the presentation. |
-| ReportLab (Python library) | Generated the derivation PDF. |
-| Windows Performance Recorder | Collected the cache profiling traces. |
-| Matplotlib (Python library) | Created benchmark graphs. |
-| Tracerpt | Exported the profiling traces for analysis. |
+| Tool and version | Used by | Used for | Files affected | What we changed or verified |
+|------------------|---------|----------|----------------|-----------------------------|
+| ChatGPT (OpenAI), November 2026 | Vishruth Agrawal (D2) | Explaining the Dima–Ceterchi structure, first drafts of the D2 proof and speaker notes | `docs/derivations/sources/D2-structureB-draft.md`, `docs/slides/D2-speaker-notes.md` | Checked every proof step against a worked example; wrote the final derivation myself |
+| AI coding assistant, November 2026 | Vishruth Agrawal (D2) | Testing Structure B, and the repository clean-up on 21 November (Makefile, `scripts/run_all.sh`, CI workflow, README, REPORT and INTERFACE restructuring, file moves) | `src/structB/*`, `tests/structB/*`, `Makefile`, `scripts/run_all.sh`, `.github/workflows/test.yml`, `README.md`, `REPORT.md`, `INTERFACE.md` | Compiled and ran every test; `make test` passes; I can explain the code and the D2 proof |
+| ChatGPT (OpenAI) | Sushmita Patil (D4) | Learning oracle-based and differential testing; first drafts of the array oracle, operation generator, differential test, failure logging and shrinker; organising the D4 proof | `oracle/*`, `docs/derivations/D4_250001069.pdf` | Adapted to the team's indexing and query interfaces; ran 1,000,000 operations on B and 100,000 on A with no mismatches; an injected fault was detected and a 5-operation failure reduced to 2 |
+| ChatGPT / Codex (OpenAI) | Vanshika Agrawal (D5) | Explaining the prefix-maximum limitation; drafting the adversarial generators, verification programs, expected counters and the D5 proof | `adversary/*`, `tests/adversary/*`, `docs/derivations/D5_250001076.pdf` | Added the code to the project by hand, compiled and ran it, checked small and full-scale results, simplified the runner and output |
+| Codex (OpenAI) | Adi Jain (D6) | Cost estimates and references; cost model and derivation draft | `docs/derivations/sources/D6-analyst-draft.md` | Reviewed the model; kept it older than the measurements |
+| Codex (OpenAI) | Adi Jain (D6) | GCD and maximum benchmarks, integration, result summaries, plots, cache-profiling setup, presentation draft, the 20 November counters-off build and reruns | `bench/*`, `results/*`, `docs/slides/*` | Checked builds against the oracle and D5 expected answers; filtered trace exports by benchmark thread lifetimes; kept earlier measurements |
+| ReportLab (Python library) | Adi Jain (D6) | Generating the prefix cost-model PDF | `docs/derivations/sources/make_d6_pdf.py` | — |
+| Matplotlib (Python library) | Adi Jain (D6) | Benchmark plots | `bench/plot_*.py`, `results/figures/*` | — |
+| Windows Performance Recorder, Tracerpt | Adi Jain (D6) | Cache profiling traces and their export | `results/raw/cache/*` | Documented the filters and the limits of sampled counts |
+| ChatGPT (OpenAI), November 2026 | Tia Mehra (D1) | Learning how a segment tree works over a monoid and why the (maximum, count) pair needs no inverse; suggesting test cases | `src/structA/*`, `tests/structA/*`, `docs/derivations/D1_250041039.pdf` | Wrote and compiled the code and tests myself; ran every test against the array oracle; can explain the code and the D1 proof |
+| ChatGPT (OpenAI), November 2026 | Anushri Maheshwari (D3) | Learning how the gcd query bound is proved by telescoping over Euclid's algorithm; suggesting test cases | `app/*`, `docs/derivations/D3_250041005.pdf` | Wrote and compiled the code and tests myself; ran the seeded and scale tests; can explain the code and the D3 proof |
 
-20 November update: Codex helped add the D6 counters-off build, rerun the maximum benchmarks and audit the newer WPR trace counts. The timing and counter builds were checked against the oracle and D5 expected answers; tracerpt exports were filtered by benchmark thread lifetimes. Earlier measurements were preserved.
+## Representative prompts
 
-## D2: Structure B owner (Vishruth Agrawal, 250001078)
-
-**Tool used:** Claude (Anthropic), and ChatGPT (OpenAI)
-
-### Verification
-
-Every test result for Structure B comes from compiling and running the tests locally. I can explain the code and the D2 proof, and I checked the proof steps against the running example in the derivation.
-
-## D4 — Oracle Owner
-
-**Tool Used:** ChatGPT (OpenAI)
-
-### Purpose of Use
-
-ChatGPT was used as a learning and development aid to understand the concepts of oracle-based testing, differential testing, invariant checking, reproducible random testing, and failure minimization.
-
-It was also used to clarify the mathematical reasoning behind why prefix differences work for sums but not for range maximum queries.
-
-### Generated Material
-
-AI assistance included initial C++ code suggestions and drafts for the array-based oracle, random operation generator, differential testing framework, failure logging, failure shrinking, and test integration. It also helped organize and explain the D4 mathematical derivation.
-
-### Work and Verification
-
-The D4 module was organized and integrated into the team repository. The suggested implementations were compiled and tested locally, with compatibility adjustments made for the different data structure interfaces.
-
-The following tests were executed:
-
-- **Structure A:** 100,000 operations, with no reported mismatches and invariant checks passing.
-- **Structure B:** 1,000,000 operations, with no reported mismatches and final internal block consistency checks passing.
-- **Failure minimization:** A deliberately injected fault was detected, and a five-operation sequence was reduced to two operations.
-
-The code and proof were reviewed as part of the D4 development and testing process.
-
-### Modifications
-
-The initial suggestions were organized into separate project files and adapted to the team's indexing conventions, query interfaces, and test requirements. Any additional implementation changes are reflected in the Git commit history.
-
-### Verification Responsibility
-
-All reported test results were obtained through local compilation and execution. The final D4 implementation and its correctness testing are included in the project repository.
-
-## D5 — Adversarial workloads
-
-Tool: ChatGPT / Codex
-
-Used for:
-- Explaining the project requirements and prefix-maximum limitation.
-- Drafting C++ adversarial generators and verification programs.
-- Deriving expected operation counters.
-- Assisted Drafting the D5 proof and supporting documentation.
-
-Student work:
-- Manually added the code to the local VS Code project.
-- Compiled and ran the programs.
-- Verified the reported small-size and full-scale results.
-- Exported the derivation to PDF.
-- Reviewed and simplified the code and explanations.
-
-Changes after generation:
-- Selected a simpler runner using a source-code workload selector.
-- Simplified output and retained answer and counter checks.
+Prompts were of two kinds, used by every member who lists ChatGPT or Codex above: asking the tool to explain the concept behind our module (for example, why prefix differences fail for maximum, or how Euclid's algorithm telescopes), and asking it to suggest test cases for code we had written. Each member keeps their own prompt history and can show it on request.

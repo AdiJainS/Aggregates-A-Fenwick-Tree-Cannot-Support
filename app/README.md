@@ -23,7 +23,7 @@ Queries use zero-based [left,right): left included, right excluded. Input begins
 
 The replay no longer prints counters from its removed reference tree. Use the separate benchmark harness for native operation counters and timing. Five-run timing means/spread, cache profiling, the Structure B comparison, failure shrinking, adversarial generators, and the final tagged team release remain separate team deliverables.
 
-The application now uses the native team implementations through the shared interface in `include/`. The default `--backend=a` uses A for reading maximum/count and calibration gcd. Use `--backend=b-hybrid` for B maximum with A count/gcd support; this hybrid is not a pure-B count/gcd implementation. The D3 proof is in `docs/derivations/D3-architect.pdf`. The official `run_ops` entry point is pending the instructor’s format; the local replay format is unchanged.
+The application now uses the native team implementations through the shared interface in `include/`. The default `--backend=a` uses A for reading maximum/count and calibration gcd. Use `--backend=b-hybrid` for B maximum with A count/gcd support; this hybrid is not a pure-B count/gcd implementation. The D3 proof is in `docs/derivations/D3_250041005.pdf`. The official `run_ops` entry point is pending the instructor’s format; the local replay format is unchanged.
 
 ## Short replay example
 

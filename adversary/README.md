@@ -113,7 +113,7 @@ Run from the repository root using a C++17 compiler.
 
 Dependencies:
 
-    oracle/operations.hpp
+    include/operations.hpp
     src/structB/prefix_fenwick_max.hpp
     src/structB/fenwick_max.hpp
 
@@ -168,8 +168,8 @@ Timing experiments and figures belong to D6's benchmark harness.
 Full-scale correctness and counter verification passed for both
 two-tree workloads at 1,048,576 elements and 1,000,000 operations.
 
-Results are saved in results/d5-queries-scale.txt and
-results/d5-decreases-scale.txt.
+Results are saved in results/raw/d5-queries-scale.txt and
+results/raw/d5-decreases-scale.txt.
 
 Integration into D4's differential harness and D6's benchmark
 harness is coordinated with their respective owners.
@@ -229,8 +229,8 @@ and expected counters.
 
 Full-scale correctness and counter results are recorded in:
 
-    results/d5-queries-scale.txt
-    results/d5-decreases-scale.txt
+    results/raw/d5-queries-scale.txt
+    results/raw/d5-decreases-scale.txt
 
 These logs are not timing measurements. The rebuilding prefix
 baseline was not replayed at million-decrease scale.
