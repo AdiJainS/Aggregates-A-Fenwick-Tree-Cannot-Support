@@ -19,7 +19,6 @@ int main() {
     assert(oracle.query(0, 3) == 12);
     assert(oracle.query(2, 2) == 0);
 
-    // Additional tests
     assert(oracle.query(0, 1) == 12);
     assert(oracle.query(0, 0) == 0);
 

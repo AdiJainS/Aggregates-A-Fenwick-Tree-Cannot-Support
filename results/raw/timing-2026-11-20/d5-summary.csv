@@ -1,0 +1,5 @@
+structure,n,operations,width,update_percent,seed,workload,decrease_percent,actual_increases,actual_decreases,actual_unchanged,runs,build_mean_ms,build_sd_ms,replay_mean_ms,replay_sd_ms,replay_min_ms,replay_max_ms
+fenwick,1048576,1000000,-1,-1,0,decrease,-1,0,500000,0,5,24.886340,0.792429,84.922900,4.283893,77.807800,88.903700
+fenwick,1048576,1000000,-1,-1,0,query,-1,0,0,0,5,27.177200,0.877474,37.468660,0.531507,37.070500,38.302900
+segment_tree,1048576,1000000,-1,-1,0,decrease,-1,0,500000,0,5,19.709180,1.147008,45.592500,0.090325,45.471800,45.696300
+segment_tree,1048576,1000000,-1,-1,0,query,-1,0,0,0,5,22.636760,1.574603,76.124680,1.014610,74.605700,77.413800

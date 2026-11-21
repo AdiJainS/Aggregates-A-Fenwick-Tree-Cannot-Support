@@ -1,14 +1,22 @@
-
-# Windows compiled executables
+/.bench-deps/
 *.exe
-
-# C++ object files
 *.o
 *.obj
-
-# Build folders
 build/
-
 /failure.txt
+/results/raw/cache/*.etl
+__pycache__/
+# Windows compiled executables
+# C++ object files
+# Build folders
 /minimized_failure.txt
 /minimized_d2_failure.txt
+
+.DS_Store
+*.etl
+bin/
+build/
+*.dSYM/
+.vscode/
+.idea/
+*.swp
