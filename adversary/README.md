@@ -113,7 +113,7 @@ Run from the repository root using a C++17 compiler.
 
 Dependencies:
 
-    oracle/operations.hpp
+    include/operations.hpp
     src/structB/prefix_fenwick_max.hpp
     src/structB/fenwick_max.hpp
 
