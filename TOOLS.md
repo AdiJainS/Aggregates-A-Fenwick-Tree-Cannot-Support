@@ -1,4 +1,6 @@
-# Tools used
+# TOOLS.md
+
+## D6: Analyst
 
 | Tool | Work |
 | --- | --- |
@@ -13,3 +15,11 @@
 | Tracerpt | Exported the profiling traces for analysis. |
 
 20 November update: Codex helped add the D6 counters-off build, rerun the maximum benchmarks and audit the newer WPR trace counts. The timing and counter builds were checked against the oracle and D5 expected answers; tracerpt exports were filtered by benchmark thread lifetimes. Earlier measurements were preserved.
+
+## D2: Structure B owner (Vishruth Agrawal, 250001078)
+
+**Tool used:** Claude (Anthropic), and ChatGPT (OpenAI)
+
+### Verification
+
+Every test result for Structure B comes from compiling and running the tests locally. I can explain the code and the D2 proof, and I checked the proof steps against the running example in the derivation.
