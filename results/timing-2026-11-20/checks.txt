@@ -1,0 +1,4 @@
+Five-run counts and matching checksums verified in 44 raw timing files.
+D5 query and decrease scale checks compare every operation with expected answers; logs are in this folder.
+The decrease study checked small random and prefix workloads against D4's oracle before timing.
+Final counter-switch check: maximum answers correct with all B counters zero. Wrong timing/counter builds rejected. Final random oracle smoke check passed. Cache audit reproduced B=4892 thread-ID samples, 4891 within lifetimes.
