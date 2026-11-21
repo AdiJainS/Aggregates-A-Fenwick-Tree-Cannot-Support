@@ -118,9 +118,117 @@ TODO (every owner): add to this table (and `docs/BUG_LOG.md`) real bugs only, fr
 
 ## 8. Adversarial inputs
 
-For $n=2^h$, the D5 difficult-query generator selects a range that makes the two-tree implementation count $2h-1$ query blocks. Its repeated-decrease workload repeatedly lowers a unique maximum and forces stored maxima to change. For $h=20$, one million difficult queries produce 39 million query blocks. A workload of 500,000 decreases and 500,000 queries produces 21 million assignment steps, 11 million lowered blocks and 10.5 million query blocks. These are implementation-specific counts, not elapsed times. The generators and proof appear in <code>adversary/ANALYSIS.md</code>.
+D5 implements three deterministic generators in
+`adversary/generators.hpp`. They return an initial array and shared
+operations with zero-based, inclusive query endpoints. No random
+seed is required. The detailed arguments are in
+`adversary/ANALYSIS.md`, and the required D5 derivation is in
+`docs/derivations/D5_250001076.pdf`.
 
-For the prefix baseline, consider $[5,3]$. Its full-prefix maximum is 5. After assigning the first element to 1, the correct maximum is 3, but applying the increase-only rule $T[i] := \max(T[i],1)$ leaves the stale maximum 5. D5 constructs a sequence of strict decreases to the first element; the baseline implementation rebuilds on every assignment. This gives $\Theta(kn)$ rebuild work for $k$ decreases, in addition to initial construction. The two-tree difficult-query and update counts are different adversarial targets: lowering stored maxima and visiting blocks are tracked separately.
+### 8.1 Repeated rebuilds in the prefix baseline
+
+**Target:** expose the incorrect increase-only update rule and
+trigger repeated full rebuilds in the correct prefix baseline.
+
+`makeRebuildWorkload(n, k)` starts with `[n,n-1,...,1]`. It assigns
+zero to positions 0 through k-1, querying the whole array after
+each assignment, where 1 <= k <= n.
+
+Before assignment j, earlier positions are zero, position j contains
+n-j, and later positions contain smaller positive values. Thus each
+assignment removes the unique global maximum. The correct answer
+after assignment j is n-j-1, including zero after the final assignment.
+
+The increase-only rule cannot remove a stale maximum. For example,
+after `[5,3]` becomes `[1,3]`, `max(5,1)` remains 5 although the
+correct maximum is 3.
+
+Our correct prefix baseline calls `rebuild()` on every strict
+decrease. Therefore k assignments cause exactly k rebuilds after
+construction. Each rebuild makes two linear passes, costing
+Theta(n), so total rebuild work is Theta(kn), or Theta(n^2) for k=n.
+This is a bound for the implemented baseline policy, not a lower
+bound for every possible Fenwick-based structure.
+
+### 8.2 Maximum-step queries in Structure B
+
+**Target:** maximise `queryBlocks` in the current two-tree query
+implementation.
+
+For n=2^h with h>=2, `makeQueryWorkload(n, queryCount)` starts with
+`[1,2,...,n]` and repeatedly queries `[0,n-2]`. Its expected answer
+is n-1.
+
+Internally the range is `[1,n-1]`. The left and right walks each
+perform h-1 iterations, followed by one final element inspection.
+Therefore each query records 2h-1 steps.
+
+This attains the maximum: when the internal right endpoint is below
+n, each walk takes at most h-1 iterations. A left jump strictly
+increases the lowest-set-bit position; a right jump removes a set
+bit and cannot reach zero. Including the final element gives at
+most 2h-1 steps. If the right endpoint equals n, the right walk
+takes zero iterations and the total is at most h+1 <= 2h-1.
+
+Exhaustive checks of every range for n=4,8,...,256 confirmed the
+predicted maximum.
+
+### 8.3 Maximum-work decreasing assignments in Structure B
+
+**Target:** maximise counted assignment work and the number of
+stored block maxima that decrease.
+
+For power-of-two n>=4,
+`makeDecreaseWorkload(n, decreases)` starts with all zeros except
+`A[0]=decreases+1`. It assigns decreases, decreases-1, ..., 1 to
+index zero, querying the whole array after each assignment.
+
+Index zero remains the unique positive maximum. Every stored block
+containing it must therefore lower its maximum on each assignment.
+
+For n=2^h, public index zero is internal position one. Right-side
+preparation takes h steps, left-side preparation takes zero,
+the first tree updates h+1 cells, and the second tree updates one.
+Thus each assignment records 2h+2 assignment steps and h+2 lowered
+blocks.
+
+For maximality, let popcount(x) count the set bits of x. At any
+internal position p<n, the four loop counts sum to
+
+    popcount(p-1) + [h-popcount(p)+1]
+    + [h-popcount(p-1)+1] + popcount(p)
+    = 2h+2.
+
+At p=n, the total is only h+2. Therefore position one attains the
+maximum assignment-step count.
+
+The number of affected stored cells is h+2-t, where t is the number
+of trailing zero bits in p. This is at most h+2. At p=1, t=0, and
+the unique maximum decreases, so all h+2 affected cells lower.
+
+Every update position was checked for n=4,8,...,256, confirming
+both maxima. Assignment steps include preparation visits;
+lowered blocks count changed stored maxima. They are distinct
+metrics, and more lowered blocks do not automatically imply
+more traversal steps.
+
+### 8.4 Full-scale verification
+
+Both two-tree workloads were checked at n=1,048,576=2^20 with
+1,000,000 operations.
+
+| Workload | Assignments | Queries | Query steps | Assignment steps | Lowered blocks |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Difficult queries | 0 | 1,000,000 | 39,000,000 | 0 | 0 |
+| Repeated decreases | 500,000 | 500,000 | 10,500,000 | 21,000,000 | 11,000,000 |
+
+Every query answer and the predicted counter totals passed.
+Results are recorded in `results/raw/d5-queries-scale.txt` and
+`results/raw/d5-decreases-scale.txt`.
+
+These are correctness and operation-count results, not elapsed
+times. Timing comparisons are reported in Section 11. The rebuilding
+prefix baseline was not executed at million-decrease scale.
 
 ## 9. Predicted cost model
 

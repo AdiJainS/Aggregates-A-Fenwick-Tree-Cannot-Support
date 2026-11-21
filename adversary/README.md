@@ -6,11 +6,12 @@ This module generates deterministic workloads for Project 5,
 ## Files
 
 - `generators.hpp`: initial arrays and operation sequences.
-- `test_adversary.cpp`: prefix-baseline failure and rebuild checks,
-  plus comparison with the two-tree Fenwick.
-- `test_queries.cpp`: difficult-query checks against all ranges
-  for small power-of-two sizes.
-- `test_decreases.cpp`: repeated decreases and update-position checks.
+- `../tests/adversary/test_adversary.cpp`: prefix-baseline failure
+  and rebuild checks, plus comparison with the two-tree Fenwick.
+- `../tests/adversary/test_queries.cpp`: difficult-query checks
+  against all ranges for small power-of-two sizes.
+- `../tests/adversary/test_decreases.cpp`: repeated decreases
+  and update-position checks.
 
 The code reuses D4's `Operation` type and D2's Fenwick implementations.
 
@@ -120,17 +121,17 @@ Dependencies:
 Compile:
 
 ```powershell
-g++ -std=c++17 -O2 adversary/test_adversary.cpp -o adversary/test_adversary.exe
-g++ -std=c++17 -O2 adversary/test_queries.cpp -o adversary/test_queries.exe
-g++ -std=c++17 -O2 adversary/test_decreases.cpp -o adversary/test_decreases.exe
+g++ -std=c++17 -O2 -Iinclude -Iadversary tests/adversary/test_adversary.cpp -o test_adversary.exe
+g++ -std=c++17 -O2 -Iinclude -Iadversary tests/adversary/test_queries.cpp -o test_queries.exe
+g++ -std=c++17 -O2 -Iinclude -Iadversary tests/adversary/test_decreases.cpp -o test_decreases.exe
 ```
 
 Run on Windows PowerShell:
 
 ```powershell
-.\adversary\test_adversary.exe
-.\adversary\test_queries.exe
-.\adversary\test_decreases.exe
+.\test_adversary.exe
+.\test_queries.exe
+.\test_decreases.exe
 ```
 
 The query test exhaustively checks small arrays only.
@@ -141,7 +142,7 @@ It must not be extended to million-element exhaustive testing.
 Compile from the repository root:
 
 ```powershell
-g++ -std=c++17 -O2 adversary/run_scale.cpp -o adversary/run_scale.exe
+g++ -std=c++17 -O2 -Iinclude -Iadversary adversary/run_scale.cpp -o adversary/run_scale.exe
 ```
 
 Set `test = 1` for difficult queries or `test = 2` for repeated
