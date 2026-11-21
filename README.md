@@ -1,6 +1,6 @@
 # Project 05: Aggregates a Fenwick Tree Cannot Support
 
-Team: TEAM-NAME-TO-FILL — CS 253 / MA 253, 2026
+Team: Quorum — CS 253 / MA 253, 2026
 
 ## Team and roles
 
