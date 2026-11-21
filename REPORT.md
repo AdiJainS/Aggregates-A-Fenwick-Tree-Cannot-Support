@@ -112,9 +112,9 @@ The differential tests are run by `make test`:
 
 | Date | Module | Symptom | Found by | Fixing commit |
 | --- | --- | --- | --- | --- |
-| TODO | TODO | TODO | TODO | TODO |
+| 2026-11-16 | Structure B (injected fault) | Omitted `ASSIGN 4 6` left index 4 at 8, so query `[3,4]` returned 8 instead of 6; the shrinker reduced 5 operations to 2. This fault was injected into the harness on purpose and is not a bug in the production code. | D4 differential shrinker | [f7ded3e](https://github.com/AdiJainS/Aggregates-A-Fenwick-Tree-Cannot-Support/commit/f7ded3e) (demonstration only); also in `docs/BUG_LOG.md` |
 
-TODO (every owner): fill this table with real bugs only, from your own notes and the commit history. Examples to look for: the Structure B assign rewrite ([9b3aa9d](https://github.com/AdiJainS/Aggregates-A-Fenwick-Tree-Cannot-Support/commit/9b3aa9d)), the segment-tree debug-check fix ([37f797e](https://github.com/AdiJainS/Aggregates-A-Fenwick-Tree-Cannot-Support/commit/37f797e)), and any mismatch the oracle reported. Do not add entries that did not happen.
+TODO (every owner): add to this table (and `docs/BUG_LOG.md`) real bugs only, from your own notes and the commit history. Examples to look for: the Structure B assign rewrite ([9b3aa9d](https://github.com/AdiJainS/Aggregates-A-Fenwick-Tree-Cannot-Support/commit/9b3aa9d)), the segment-tree debug-check fix ([37f797e](https://github.com/AdiJainS/Aggregates-A-Fenwick-Tree-Cannot-Support/commit/37f797e)), and any mismatch the oracle reported. Do not add entries that did not happen.
 
 ## 8. Adversarial inputs
 
