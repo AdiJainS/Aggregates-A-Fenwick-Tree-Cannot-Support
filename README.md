@@ -1,140 +1,118 @@
-# Aggregates a Fenwick Tree Cannot Support
+# Project 05: Aggregates a Fenwick Tree Cannot Support
 
-**CS253 / MA253 · Project 5**
+Team: TEAM-NAME-TO-FILL — CS 253 / MA 253, 2026
 
-This project studies a sensor array that needs range maximum, the number of times that maximum occurs, and range GCD while individual values can increase or decrease. We compare a segment tree with a two-tree Fenwick structure and check their answers against a plain array.
+## Team and roles
 
-A standard Fenwick tree can obtain a range sum by subtracting two prefix sums. This trick cannot recover an arbitrary range maximum: identical prefix maxima can hide different maxima in the requested range. Structure B stores additional block information; a prefix-only maximum tree is retained as a baseline.
+| Name | Roll no. | GitHub | Role | Module folder | Derivation |
+|------|----------|--------|------|---------------|------------|
+| Tia Mehra | 250041039 | @Tia-917 | Structure A owner | `src/structA/` | D1 |
+| Vishruth Agrawal | 250001078 | @Vishruth-create | Structure B owner | `src/structB/` | D2 |
+| Anushri Maheshwari | 250041005 | @Apples-17 | Architect | `app/`, `include/`, `INTERFACE.md` | D3 |
+| Sushmita Patil | 250001069 | @psush29 | Oracle owner | `oracle/` | D4 |
+| Vanshika Agrawal | 250001076 | @vanshi040907 | Adversary | `adversary/` | D5 |
+| Adi Jain | 250001083 | @AdiJainS | Analyst | `bench/` | D6 |
 
-## Team
+## Summary
 
-| Role | Member | Roll number |
-| --- | --- | --- |
-| D1 · Structure A | Tia Mehra | 250041039 |
-| D2 · Structure B | Vishruth Agrawal | 250001078 |
-| D3 · Architect | Anushri Maheshwari | 250041005 |
-| D4 · Oracle | Sushmita Patil | 250001069 |
-| D5 · Adversary | Vanshika Agrawal | 250001076 |
-| D6 · Analyst | Adi Jain | 250001083 |
-
-## How the project works
-
-1. **Define the input.** Each sensor has a reading and a calibration value. The replay accepts point assignments and range queries; see [INTERFACE.md](INTERFACE.md).
-2. **Build Structure A.** A segment tree stores `(maximum, count)` and GCD aggregates. Assignments update a leaf and its ancestors; queries combine blocks covering the requested range.
-3. **Build Structure B.** Two Fenwick-style trees store block maxima in opposite directions, allowing arbitrary range-maximum queries and assignments. The prefix-only baseline rebuilds on a decrease.
-4. **Check answers.** A plain-array oracle scans ranges. Differential tests replay the same operations and compare answers, including maximum counts and GCD where supported.
-5. **Try difficult inputs.** D5 generates queries with many block touches and repeated decreases of a unique maximum.
-6. **Measure.** D6 generates seeded workloads, checks manageable cases, measures construction and replay separately, and collects counters in separate runs. CSVs and plots are in `results/`.
-7. **Compare with predictions.** [REPORT.md](REPORT.md) describes the measurements and their limits; `docs/derivations/` contains the mathematical work for each role.
-
-The runnable application in `app/` currently uses the architect's **reference segment-tree backend**. It does not yet select between the D1 and D2 implementations. Structure B implements range maximum; it does not by itself provide maximum counts or GCD. The A/B comparison is run through the separate benchmark harness in `bench/`.
+A sensor array of one million values needs range maximum, the number of times the maximum occurs, and range gcd, while single values can be assigned new values that may be lower. A prefix-sum Fenwick tree cannot do this because maximum has no inverse. Structure A is a segment tree over a monoid; Structure B is the two-array Fenwick range-maximum structure of Dima and Ceterchi, with a prefix-maximum-only Fenwick tree as the baseline. Both A and B answer range maximum in logarithmic steps; the prefix-only baseline needs a full rebuild after each decrease. In our timing runs neither structure wins everywhere: B is faster for width 1024 with 10% updates and for difficult queries, and A is faster when updates are frequent. REPORT.md has the full analysis and its limits.
 
 ## Requirements
 
-- Git and a C++17 compiler with the C++17 standard library (for example, a recent GCC or Clang). GCC 6.3 lacks `std::gcd`, required by some tests.
-- Python 3 for benchmark scripts. Matplotlib is needed only to generate plots: `python -m pip install matplotlib`.
-- Windows Performance Recorder and Windows Performance Analyzer are optional, for cache profiling.
+- OS: macOS (tested on macOS with Apple clang 21.0.0) or Linux (CI runs on Ubuntu 22.04). The recorded measurements in `results/raw/` were taken on Windows 11 with Zig 0.13.0 / Clang 18.1.6.
+- Compiler: any C++17 compiler (`c++`, with `-std=c++17 -O2`). GCC 6 is too old (`std::gcd`).
+- `make`.
+- Python 3 with `matplotlib`, only for regenerating figures and running the benchmark scripts (tested with Python 3.13.12 and matplotlib 3.10.9).
+- No library containers stand in for a structure under study. Only `std::vector` is used, as storage.
 
-Commands below use **Windows PowerShell** from the repository root. On Linux or macOS, use a C++17 compiler and normal shell input redirection; [app/README.md](app/README.md) contains Unix examples.
+## Build
 
-## 1. Get the project
+    make
 
-```powershell
-git clone https://github.com/AdiJainS/Aggregates-A-Fenwick-Tree-Cannot-Support.git
-cd Aggregates-A-Fenwick-Tree-Cannot-Support
-```
+This builds `bin/app`, `bin/max_benchmark` and `bin/gcd_benchmark`.
 
-Check that `g++ --version` and `python --version` work. Substitute another C++17 compiler if needed.
+## Quick start
 
-## 2. Build and run the sensor replay
+    ./bin/app < app/sample.in
 
-```powershell
-New-Item -ItemType Directory -Force .bench-deps | Out-Null
-g++ -std=c++17 -O2 app/gcd_segment_tree.cpp -o .bench-deps/sensor-replay.exe
-Get-Content app/sample.in | .\.bench-deps\sensor-replay.exe
-```
+Expected output:
 
-The output should match [app/sample.out](app/sample.out):
+    30 2 6
+    30 1 6
+    30 1 1
+    18 1 1
+    -1 0 0
 
-```text
-30 2 6
-30 1 6
-30 1 1
-18 1 1
--1 0 0
-```
+Each `Q left right` line prints `maximum count gcd` over the half-open range `[left, right)`. See `INTERFACE.md` for the input format.
 
-To supply your own input, save it in a text file and run `Get-Content your-input.txt | .\.bench-deps\sensor-replay.exe`. Input format:
+## Tests
 
-```text
-n number_of_operations
-reading_0 calibration_0
-... one pair per sensor ...
-Q left right
-U index new_reading new_calibration
-```
+    make test
 
-`Q left right` prints `maximum count gcd` over the **zero-based, half-open** range `[left, right)`; the right endpoint is excluded. `U` replaces both values at the given index. An empty range prints `-1 0 0`. See [INTERFACE.md](INTERFACE.md) for input restrictions.
+This builds and runs every unit test, invariant checker and differential test, then the sample check and the application's own `--test` (one million seeded operations, seed 253). The oracle tests use seed 42. A passing run ends with:
 
-## 3. Run correctness checks
+    ALL TESTS PASSED
 
-Run the replay's seeded checks:
+What the differential tests run:
 
-```powershell
-.\.bench-deps\sensor-replay.exe --test
-```
+- Structure B against the array oracle: 1,000,000 operations (`oracle/test_scale_d2.cpp`, seed 42).
+- Structure A against the array oracle: 100,000 operations (`oracle/test_real_d1.cpp`, seed 42).
+- The application's segment tree: 1,000,000 operations (`bin/app --test`, seed 253).
 
-Compile and run the D1 query and assignment checks:
+## Evaluation interface (hidden tests)
 
-```powershell
-g++ -std=c++17 -O2 src/structA/test_query.cpp -o .bench-deps/test-a-query.exe
-g++ -std=c++17 -O2 src/structA/test_update.cpp -o .bench-deps/test-a-update.exe
-.\.bench-deps\test-a-query.exe
-.\.bench-deps\test-a-update.exe
-```
+    ./bin/app < ops.txt > out.txt
 
-Other tests are alongside their modules in `src/structA/`, `src/structB/`, `oracle/` and `adversary/`. On a Unix-like shell, `sh app/run_checks.sh` builds the application, checks the sample, runs `--test` and runs the larger `--scale` smoke test. The scale test checks sampled answers, not every full-scale query.
+Input and output follow the sensor-replay format in `INTERFACE.md` (Part 2). Example input and its output are `app/sample.in` and `app/sample.out`. The instructor's published evaluation format for Project 05 has not been matched yet: there is no `--structure A|B` switch, and the application currently uses its own reference segment tree for both maximum and gcd. See Known limitations.
 
-## 4. Build and run the maximum benchmark
+## Benchmarks and figures
 
-```powershell
-g++ -std=c++17 -O2 -DSTRUCTB_DISABLE_COUNTERS bench/max_benchmark.cpp -o .bench-deps/max_benchmark.exe
-.\.bench-deps\max_benchmark.exe 1000 10000 64 20 253 5 random check
-.\.bench-deps\max_benchmark.exe 1000 10000 64 20 253 5 random time
-```
+    ./scripts/run_all.sh
 
-Arguments are `N OPERATIONS WIDTH UPDATE_PERCENT SEED RUNS WORKLOAD MODE [DECREASE_PERCENT]`. The first command checks a manageable workload against the oracle; the second prints timing results as CSV. `UPDATE_PERCENT` is the share of all operations that are updates. The optional decrease percentage is the intended share **among updates**.
+This builds, runs the tests and the sample, and regenerates the figures in `results/figures/timing-2026-11-20/` from the CSVs in `results/raw/timing-2026-11-20/`. It takes about 20 seconds on a warm build. `FULL=1 ./scripts/run_all.sh` also reruns the full-scale experiments into `results/raw/rerun-<date>/`; that is much slower and its running time has not been measured. See `bench/README.md` for every benchmark argument.
 
-For a separate counter build, enable A's counters and leave B's counter switch enabled:
-
-```powershell
-g++ -std=c++17 -O2 -DSTRUCTA_ENABLE_COUNTERS bench/max_benchmark.cpp -o .bench-deps/max_counts.exe
-.\.bench-deps\max_counts.exe 4096 1024 1 0 0 5 rebuild counts
-```
-
-The timing build disables counters for both structures; counter runs use a different build. For full-scale random matrices, decrease sweeps, D5 workloads, GCD benchmarks and plots, follow [bench/README.md](bench/README.md). Use a new output folder so earlier results are not overwritten. Full-scale runs take substantially longer than the small example.
-
-## 5. Read the results and derivations
-
-- [REPORT.md](REPORT.md): predicted costs, timing comparisons, adversarial results and cache limitations.
-- [results/README.md](results/README.md): machine, compiler, seeds, source revisions and CSV descriptions.
-- [20 November results](results/timing-2026-11-20/README.md): counters-off timing runs and reproduction commands.
-- [Cache profiling](results/cache/README.md): WPR recording commands and interpretation of sampled events.
-- [D5 workloads](adversary/README.md): generators, arguments and verification.
-- [TOOLS.md](TOOLS.md): tools and assistance used by the team.
-
-## Repository layout
+## Repository map
 
 | Path | Contents |
 | --- | --- |
-| `src/structA/` | Segment tree, maximum/count and GCD wrappers, and tests |
-| `src/structB/` | Two-tree and prefix-only Fenwick maximum implementations and tests |
-| `app/` | Sensor replay reference application and sample input/output |
-| `oracle/` | Array oracle, operation generator and differential tests |
-| `adversary/` | Adversarial workload generators, analysis and checks |
-| `bench/` | Benchmark harnesses and plotting/summarizing scripts |
-| `results/` | Raw CSVs, figures, profiling summaries and run settings |
-| `docs/derivations/` | Individual mathematical derivations |
-| `presentation/` | D6 presentation material |
+| `include/` | Shared `Operation` type |
+| `src/structA/` | Segment tree, maximum/count and gcd wrappers (Structure A) |
+| `src/structB/` | Two-array Fenwick maximum and the prefix-only baseline (Structure B) |
+| `app/` | Sensor replay application, sample input and output |
+| `oracle/` | Array oracle, operation generator, gcd reference, differential tests |
+| `adversary/` | Adversarial workload generators and analysis |
+| `bench/` | Benchmark harness, counters, plotting and summary scripts |
+| `tests/` | Unit tests and invariant checks for A, B and the adversary |
+| `scripts/` | `run_all.sh` |
+| `results/raw/` | Raw CSV logs and check outputs |
+| `results/figures/` | Figures generated from `results/raw/` |
+| `docs/derivations/` | D1 to D6 PDFs, plus `sources/` (drafts) and `extra/` |
+| `docs/slides/` | Slide material and speaker notes |
+| `docs/report-images/` | Diagrams used in REPORT.md |
 
-The recorded cache counts are sampled events, not exact miss totals or rates. The traces include setup and construction, so they alone do not establish which structure has better cache behavior. The team should agree on final implementation revisions and rerun affected checks before a release.
+## Results at a glance
+
+Five-run means ± standard deviation in ms, one million values and operations, seed 253, counters off (20 November runs, Windows machine described in `REPORT.md`):
+
+| Workload | Segment tree A | Two-array Fenwick B |
+| --- | ---: | ---: |
+| Random, width 1, 10% updates | 53.41 ± 0.66 | 68.88 ± 0.81 |
+| Random, width 1024, 10% updates | 215.51 ± 6.58 | 143.16 ± 4.87 |
+| Random, width 1024, 90% updates | 341.94 ± 44.03 | 624.30 ± 92.48 |
+| D5 difficult queries, n = 1,048,576 | 76.12 ± 1.01 | 37.47 ± 0.53 |
+| D5 500,000 decreases + 500,000 queries | 45.59 ± 0.09 | 84.92 ± 4.28 |
+
+The prefix-only baseline (n = 4096, 10,000 operations, 50% updates) took 0.23, 14.12 and 27.84 ms with 0, 2,532 and 5,051 decreases. Full analysis is in `REPORT.md`.
+
+## Known limitations
+
+- No `run_ops --structure A|B` evaluation binary yet. `bin/app` uses its own reference segment tree and is not wired to `src/structA/` or `src/structB/`.
+- The Structure A differential test runs 100,000 operations, not 10^6.
+- The timing data was recorded on a Windows machine without background-load control. Some configurations have large spread. The cache profiling uses Windows tracing tools and is sampled, not exact miss counts.
+- Structure B's build scans its blocks and has an O(n log n) upper bound, whereas the paper describes a linear build.
+- Some figures in `results/figures/` come from earlier runs that used different counter settings; REPORT.md names which run each belongs to.
+- `docs/slides/slides.pdf` and `REPORT.pdf` are not in the repository yet.
+
+## Tools and references
+
+AI and other tools are declared in `TOOLS.md`. Main references: Fenwick (1994); Dima and Ceterchi, "Efficient range minimum queries using binary indexed trees", Olympiads in Informatics 9 (2015); de Berg et al., *Computational Geometry*, ch. 10; Knuth, *TAOCP* vol. 2, §4.5.3. The full list is in `REPORT.md`.
