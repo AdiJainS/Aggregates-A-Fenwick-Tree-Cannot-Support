@@ -9,7 +9,7 @@ c++ -std=c++17 -O2 -Wall -Wextra -pedantic app/gcd_segment_tree.cpp -o /tmp/sens
 /tmp/sensor-replay < app/sample.in
 ```
 
-Run all local checks in one command:
+Run the common-interface checks, samples, million-operation tests and scale replay against both backends in one command:
 
 ```sh
 sh app/run_checks.sh
@@ -21,9 +21,9 @@ Queries use zero-based [left,right): left included, right excluded. Input begins
 
 `--scale` runs one million operations on one million sensors (500,000 updates and 500,000 queries), prints a CSV checksum, and validates 50 sampled queries using an array scan. This is a scale smoke test, not a complete full-scale differential test. The checksum wraps modulo the unsigned type's range.
 
-Diagnostic counters on stderr include construction, tree operations, and small-test invariant audits; oracle arithmetic is excluded. They are not isolated benchmark timings. Five-run timing means/spread, cache profiling, the Structure B comparison, failure shrinking, adversarial generators, and the final tagged team release remain separate team deliverables.
+The replay no longer prints counters from its removed reference tree. Use the separate benchmark harness for native operation counters and timing. Five-run timing means/spread, cache profiling, the Structure B comparison, failure shrinking, adversarial generators, and the final tagged team release remain separate team deliverables.
 
-The generic segment tree is the Architect application's runnable reference backend. Coordinate its replacement with Structure A's owner. A Structure B maximum-only adapter is not implemented here. The D3 proof is in docs/derivations/D3-architect.pdf.
+The application now uses the native team implementations through the shared interface in `include/`. The default `--backend=a` uses A for reading maximum/count and calibration gcd. Use `--backend=b-hybrid` for B maximum with A count/gcd support; this hybrid is not a pure-B count/gcd implementation. The D3 proof is in `docs/derivations/D3-architect.pdf`. The official `run_ops` entry point is pending the instructor’s format; the local replay format is unchanged.
 
 ## Short replay example
 
@@ -51,3 +51,13 @@ Expected output:
 `Q 0 1` includes only sensor 0. The assignment lowers sensor 1's reading from 99 to 4 and replaces its calibration factor with 14. The next query covers all three sensors: the maximum is 10, it occurs once, and gcd(6,14,10) is 2. The last query is empty because its endpoints are equal. Assignments do not print output.
 
 Sensor indices run from `0` to `n - 1`. A query may use `right = n` to include the last sensor, while `left = right` selects an empty range.
+
+## Shared A/B entry points
+
+`include/range_max.hpp` defines `aggregates::RangeMax`. `include/structure_adapters.hpp` provides A and B implementations with identical zero-based half-open maximum queries and point assignments. Count and gcd are A-only extensions. `include/sensor_replay.hpp` composes the two-field application. See the root `INTERFACE.md` for the complete contract.
+
+```sh
+/tmp/sensor-replay --backend=b-hybrid < app/sample.in
+/tmp/sensor-replay --backend=b-hybrid --test
+/tmp/sensor-replay --backend=a --scale
+```

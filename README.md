@@ -27,7 +27,7 @@ A standard Fenwick tree can obtain a range sum by subtracting two prefix sums. T
 6. **Measure.** D6 generates seeded workloads, checks manageable cases, measures construction and replay separately, and collects counters in separate runs. CSVs and plots are in `results/`.
 7. **Compare with predictions.** [REPORT.md](REPORT.md) describes the measurements and their limits; `docs/derivations/` contains the mathematical work for each role.
 
-The runnable application in `app/` currently uses the architect's **reference segment-tree backend**. It does not yet select between the D1 and D2 implementations. Structure B implements range maximum; it does not by itself provide maximum counts or GCD. The A/B comparison is run through the separate benchmark harness in `bench/`.
+The application in `app/` uses the team's native structures through the shared adapters in `include/`. Select `--backend=a` (default) for Structure A, or `--backend=b-hybrid` for B's range maximum with A supplying count and calibration GCD. The hybrid is not a pure-B aggregate implementation. The maximum-only A/B comparison remains in `bench/`; see [INTERFACE.md](INTERFACE.md) for the common half-open API and each backend's capabilities.
 
 ## Requirements
 
@@ -54,7 +54,7 @@ g++ -std=c++17 -O2 app/gcd_segment_tree.cpp -o .bench-deps/sensor-replay.exe
 Get-Content app/sample.in | .\.bench-deps\sensor-replay.exe
 ```
 
-The output should match [app/sample.out](app/sample.out):
+To replay the same input with B supplying the maximum, use `Get-Content app/sample.in | .\.bench-deps\sensor-replay.exe --backend=b-hybrid`. Both modes should match [app/sample.out](app/sample.out):
 
 ```text
 30 2 6
@@ -93,7 +93,7 @@ g++ -std=c++17 -O2 src/structA/test_update.cpp -o .bench-deps/test-a-update.exe
 .\.bench-deps\test-a-update.exe
 ```
 
-Other tests are alongside their modules in `src/structA/`, `src/structB/`, `oracle/` and `adversary/`. On a Unix-like shell, `sh app/run_checks.sh` builds the application, checks the sample, runs `--test` and runs the larger `--scale` smoke test. The scale test checks sampled answers, not every full-scale query.
+Other tests are alongside their modules in `src/structA/`, `src/structB/`, `oracle/` and `adversary/`. On a Unix-like shell, `sh app/run_checks.sh` builds the application, checks the sample, runs the shared-interface checks, and runs `--test` plus the larger `--scale` smoke test against both application backends. The scale test checks sampled answers, not every full-scale query.
 
 ## 4. Build and run the maximum benchmark
 
@@ -129,7 +129,8 @@ The timing build disables counters for both structures; counter runs use a diffe
 | --- | --- |
 | `src/structA/` | Segment tree, maximum/count and GCD wrappers, and tests |
 | `src/structB/` | Two-tree and prefix-only Fenwick maximum implementations and tests |
-| `app/` | Sensor replay reference application and sample input/output |
+| `include/` | Common A/B maximum interface, native adapters and sensor facade |
+| `app/` | Native sensor replay, contract tests and sample input/output |
 | `oracle/` | Array oracle, operation generator and differential tests |
 | `adversary/` | Adversarial workload generators, analysis and checks |
 | `bench/` | Benchmark harnesses and plotting/summarizing scripts |
@@ -138,3 +139,7 @@ The timing build disables counters for both structures; counter runs use a diffe
 | `presentation/` | D6 presentation material |
 
 The recorded cache counts are sampled events, not exact miss totals or rates. The traces include setup and construction, so they alone do not establish which structure has better cache behavior. The team should agree on final implementation revisions and rerun affected checks before a release.
+
+## Instructor evaluation format
+
+The official `run_ops` format has not been supplied in this repository. The shared adapters are ready for its integration, but the current sensor replay is not claimed to implement that format. The evaluation binary will be added when the instructor publishes its input/output specification.

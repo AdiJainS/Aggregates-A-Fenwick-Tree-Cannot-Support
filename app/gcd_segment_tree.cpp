@@ -2,139 +2,14 @@
 #include <vector>
 #include <string>
 #include <stdexcept>
+#include "../include/sensor_replay.hpp"
 
 using namespace std;
-using Value = unsigned long long;
-
-unsigned long long gcd_merges = 0, remainder_steps = 0, max_merges = 0;
-
-struct MaxCount {
-    long long maximum;
-    int count;
-    bool operator==(const MaxCount& other) const {
-        return maximum == other.maximum && count == other.count;
-    }
-};
-
-struct GcdMerge {
-    Value operator()(Value a, Value b) const {
-        ++gcd_merges;
-        while (b != 0) {
-            ++remainder_steps;
-            Value remainder = a % b;
-            a = b;
-            b = remainder;
-        }
-        return a;
-    }
-};
-
-struct MaxMerge {
-    MaxCount operator()(MaxCount a, MaxCount b) const {
-        ++max_merges;
-        if (a.maximum > b.maximum) return a;
-        if (b.maximum > a.maximum) return b;
-        return {a.maximum, a.count + b.count};
-    }
-};
-
-template<class T, class Merge>
-class SegmentTree {
-    int base = 1;
-    T identity;
-    Merge merge;
-    vector<T> tree;
-public:
-    SegmentTree(const vector<T>& values, T empty) : identity(empty) {
-        while (base < static_cast<int>(values.size())) base *= 2;
-        tree.assign(2 * base, identity);
-        for (int i = 0; i < static_cast<int>(values.size()); ++i)
-            tree[base + i] = values[i];
-        for (int i = base - 1; i > 0; --i)
-            tree[i] = merge(tree[2*i], tree[2*i+1]);
-    }
-
-    void assign(int index, T value) {
-        int position = base + index;
-        tree[position] = value;
-        while (position > 1) {
-            position /= 2;
-            tree[position] = merge(tree[2*position], tree[2*position+1]);
-        }
-    }
-
-    bool valid() const {
-        for (int i = 1; i < base; ++i)
-            if (!(tree[i] == merge(tree[2*i], tree[2*i+1]))) return false;
-        return true;
-    }
-
-    T query(int left, int right) const {
-        T first = identity, last = identity;
-        left += base;
-        right += base;
-        while (left < right) {
-            if (left & 1) first = merge(first, tree[left++]);
-            if (right & 1) last = merge(tree[--right], last);
-            left /= 2;
-            right /= 2;
-        }
-        return merge(first, last);
-    }
-};
-
-struct Sensor {
-    long long reading;
-    Value calibration;
-};
-
-struct Answer {
-    long long maximum;
-    int count;
-    Value gcd;
-};
-
-class SensorReplay {
-    int size;
-    SegmentTree<MaxCount, MaxMerge> readings;
-    SegmentTree<Value, GcdMerge> calibrations;
-
-    static vector<MaxCount> reading_values(const vector<Sensor>& sensors) {
-        vector<MaxCount> values;
-        for (const Sensor& sensor : sensors) values.push_back({sensor.reading, 1});
-        return values;
-    }
-    static vector<Value> calibration_values(const vector<Sensor>& sensors) {
-        vector<Value> values;
-        for (const Sensor& sensor : sensors) values.push_back(sensor.calibration);
-        return values;
-    }
-public:
-    explicit SensorReplay(const vector<Sensor>& sensors)
-        : size(static_cast<int>(sensors.size())),
-          readings(reading_values(sensors), {-1, 0}),
-          calibrations(calibration_values(sensors), 0) {}
-
-    void assign(int index, Sensor sensor) {
-        if (index < 0 || index >= size) throw runtime_error("Invalid index");
-        if (sensor.reading < 0 || sensor.reading > 1000000000 ||
-            sensor.calibration > 1000000000)
-            throw runtime_error("Values must be between 0 and 1000000000");
-        readings.assign(index, {sensor.reading, 1});
-        calibrations.assign(index, sensor.calibration);
-    }
-
-    bool valid() const {
-        return readings.valid() && calibrations.valid();
-    }
-
-    Answer query(int left, int right) const {
-        if (left < 0 || left > right || right > size)
-            throw runtime_error("Invalid range");
-        MaxCount result = readings.query(left, right);
-        return {result.maximum, result.count, calibrations.query(left, right)};
-    }
-};
+using aggregates::Sensor;
+using aggregates::Answer;
+using aggregates::SensorReplay;
+using aggregates::Backend;
+using Value = aggregates::GcdValue;
 
 Sensor read_sensor() {
     long long reading, calibration;
@@ -144,13 +19,13 @@ Sensor read_sensor() {
     return {reading, static_cast<Value>(calibration)};
 }
 
-int replay() {
+int replay(Backend backend) {
     int n, operations;
     if (!(cin >> n >> operations) || n < 0 || n > 1000000 || operations < 0)
         throw runtime_error("Invalid array size or operation count");
     vector<Sensor> sensors(n);
     for (Sensor& sensor : sensors) sensor = read_sensor();
-    SensorReplay application(sensors);
+    SensorReplay application(sensors, backend);
     for (int step = 0; step < operations; ++step) {
         char operation;
         if (!(cin >> operation)) throw runtime_error("Missing operation");
@@ -210,8 +85,8 @@ void check_range(const vector<Sensor>& sensors, const SensorReplay& app,
                             to_string(left) + " " + to_string(right));
 }
 
-int tests(int operations) {
-    SensorReplay boundary_check({{10, 6}, {99, 35}, {7, 10}});
+int tests(int operations, Backend backend) {
+    SensorReplay boundary_check({{10, 6}, {99, 35}, {7, 10}}, backend);
     Answer single = boundary_check.query(0, 1);
     if (single.maximum != 10 || single.count != 1 || single.gcd != 6)
         throw runtime_error("Left-inclusive, right-exclusive boundary test failed");
@@ -224,7 +99,7 @@ int tests(int operations) {
 
     for (int n = 0; n <= 17; ++n) {
         vector<Sensor> sensors(n, {0, 0});
-        SensorReplay app(sensors);
+        SensorReplay app(sensors, backend);
         for (int step = 0; step <= n; ++step) {
             for (int left = 0; left <= n; ++left)
                 for (int right = left; right <= n; ++right)
@@ -243,7 +118,7 @@ int tests(int operations) {
         }
     }
     vector<Sensor> limits{{1000000000, 1000000000}, {1000000000, 0}, {0, 1}};
-    SensorReplay limit_app(limits);
+    SensorReplay limit_app(limits, backend);
     check_range(limits, limit_app, 0, 3);
     limit_app.assign(0, {0, 0});
     limits[0] = {0, 0};
@@ -251,7 +126,7 @@ int tests(int operations) {
     unsigned long long seed = 253;
     const int n = 37;
     vector<Sensor> sensors(n, {0, 0});
-    SensorReplay app(sensors);
+    SensorReplay app(sensors, backend);
     for (int step = 0; step < operations; ++step) {
         unsigned long long choice = next_random(seed);
         if ((choice >> 32) % 2) {
@@ -280,7 +155,7 @@ int tests(int operations) {
     return 0;
 }
 
-int scale_run() {
+int scale_run(Backend backend) {
     const int n = 1000000, operations = 1000000;
     unsigned long long seed = 253;
     vector<Sensor> sensors(n);
@@ -288,7 +163,7 @@ int scale_run() {
         sensor.reading = static_cast<long long>((next_random(seed) >> 32) % 1000000001);
         sensor.calibration = (next_random(seed) >> 32) % 1000000001;
     }
-    SensorReplay app(sensors);
+    SensorReplay app(sensors, backend);
     Value checksum = 0;
     int updates = 0, queries = 0;
     for (int step = 0; step < operations; ++step) {
@@ -320,16 +195,24 @@ int main(int argc, char* argv[]) {
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
     try {
-        int result;
-        if (argc == 1) result = replay();
-        else if (argc == 2 && string(argv[1]) == "--test") result = tests(1000000);
-        else if (argc == 2 && string(argv[1]) == "--scale") result = scale_run();
-        else throw runtime_error("Usage: sensor_replay [--test|--scale]");
-        if (argc > 1) {
-            cerr << "gcd_merges=" << gcd_merges << " remainder_steps=" << remainder_steps
-                 << " max_merges=" << max_merges << '\n';
+        Backend backend = Backend::A;
+        string mode;
+        bool chosenBackend = false;
+        for (int i = 1; i < argc; ++i) {
+            string argument = argv[i];
+            if (argument == "--backend=a" || argument == "--backend=b-hybrid") {
+                if (chosenBackend) throw runtime_error("Choose one backend");
+                chosenBackend = true;
+                backend = argument == "--backend=a" ? Backend::A : Backend::BHybrid;
+            } else if ((argument == "--test" || argument == "--scale") && mode.empty()) {
+                mode = argument;
+            } else {
+                throw runtime_error("Usage: sensor_replay [--backend=a|--backend=b-hybrid] [--test|--scale]");
+            }
         }
-        return result;
+        if (mode == "--test") return tests(1000000, backend);
+        if (mode == "--scale") return scale_run(backend);
+        return replay(backend);
     } catch (const exception& error) {
         cerr << error.what() << '\n';
         return 1;
