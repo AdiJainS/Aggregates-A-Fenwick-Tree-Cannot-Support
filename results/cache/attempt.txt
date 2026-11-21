@@ -1,0 +1,5 @@
+Windows Performance Recorder (WPR)
+Profile: bench/cache_profile.wprp, sampling CacheMisses every 65536 events.
+Attempt: wpr -start bench/cache_profile.wprp!Cache -filemode -instancename D6Cache
+Result: failed; a required privilege is not held by the client (0xd0000061).
+No trace or cache-miss comparison was produced. The session was not elevated.
