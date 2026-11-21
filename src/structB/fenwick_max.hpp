@@ -6,6 +6,11 @@
 
 class FenwickMax {
 private:
+#ifdef STRUCTB_DISABLE_COUNTERS
+    static constexpr bool collectCounters = false;
+#else
+    static constexpr bool collectCounters = true;
+#endif
     int n;
     std::vector<long long> a;
     std::vector<long long> bit1;
@@ -47,7 +52,7 @@ private:
                 result = bit2[left];
             }
             left = left + lowbit(left);
-            steps++;
+            if (collectCounters) steps++;
         }
 
         int right = r;
@@ -56,13 +61,13 @@ private:
                 result = bit1[right];
             }
             right = right - lowbit(right);
-            steps++;
+            if (collectCounters) steps++;
         }
 
         if (a[left] > result) {
             result = a[left];
         }
-        steps++;
+        if (collectCounters) steps++;
 
         return result;
     }
@@ -116,7 +121,7 @@ public:
             throw std::out_of_range("Invalid query range");
         }
 
-        queries++;
+        if (collectCounters) queries++;
         return queryPos(l + 1, r + 1, queryBlocks);
     }
 
@@ -125,7 +130,7 @@ public:
             throw std::out_of_range("Invalid index");
         }
 
-        assigns++;
+        if (collectCounters) assigns++;
 
         int p = index + 1;
         a[p] = value;
@@ -137,15 +142,15 @@ public:
             best = bigger(best, queryPos(start, p - 1, assignBlocks));
             best = bigger(best, queryPos(p + 1, x, assignBlocks));
 
-            if (best != bit1[x]) {
+            if (collectCounters && best != bit1[x]) {
                 changedBlocks++;
             }
-            if (best < bit1[x]) {
+            if (collectCounters && best < bit1[x]) {
                 loweredBlocks++;
             }
             bit1[x] = best;
 
-            assignBlocks++;
+            if (collectCounters) assignBlocks++;
             x = x + lowbit(x);
         }
 
@@ -159,15 +164,15 @@ public:
             best = bigger(best, queryPos(x, p - 1, assignBlocks));
             best = bigger(best, queryPos(p + 1, end, assignBlocks));
 
-            if (best != bit2[x]) {
+            if (collectCounters && best != bit2[x]) {
                 changedBlocks++;
             }
-            if (best < bit2[x]) {
+            if (collectCounters && best < bit2[x]) {
                 loweredBlocks++;
             }
             bit2[x] = best;
 
-            assignBlocks++;
+            if (collectCounters) assignBlocks++;
             x = x - lowbit(x);
         }
     }
@@ -177,7 +182,7 @@ public:
             throw std::out_of_range("Invalid index");
         }
 
-        assigns++;
+        if (collectCounters) assigns++;
 
         int p = index + 1;
         a[p] = value;
@@ -188,7 +193,7 @@ public:
             rightBefore[q] = run;
             run = bigger(run, bit2[q]);
             q = q + lowbit(q);
-            assignBlocks++;
+            if (collectCounters) assignBlocks++;
         }
         long long rightAll = run;
 
@@ -198,7 +203,7 @@ public:
             leftBefore[u] = run;
             run = bigger(run, bit1[u]);
             u = u - lowbit(u);
-            assignBlocks++;
+            if (collectCounters) assignBlocks++;
         }
         long long leftAll = run;
 
@@ -218,15 +223,15 @@ public:
                 best = bigger(best, bigger(rightBefore[x], a[x]));
             }
 
-            if (best != bit1[x]) {
+            if (collectCounters && best != bit1[x]) {
                 changedBlocks++;
             }
-            if (best < bit1[x]) {
+            if (collectCounters && best < bit1[x]) {
                 loweredBlocks++;
             }
             bit1[x] = best;
 
-            assignBlocks++;
+            if (collectCounters) assignBlocks++;
             x = x + lowbit(x);
         }
 
@@ -246,15 +251,15 @@ public:
                 best = bigger(best, rightBefore[after]);
             }
 
-            if (best != bit2[y]) {
+            if (collectCounters && best != bit2[y]) {
                 changedBlocks++;
             }
-            if (best < bit2[y]) {
+            if (collectCounters && best < bit2[y]) {
                 loweredBlocks++;
             }
             bit2[y] = best;
 
-            assignBlocks++;
+            if (collectCounters) assignBlocks++;
             y = y - lowbit(y);
         }
     }

@@ -1,0 +1,3 @@
+structure,query_blocks,update_steps,changed_blocks,lowered_blocks,rebuilds
+segment_tree,499598,10508442,,,
+fenwick,499598,19996189,1265201,633009,
