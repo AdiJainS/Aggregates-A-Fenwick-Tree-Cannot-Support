@@ -4,7 +4,7 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, KeepTogethe
 
 styles = getSampleStyleSheet()
 styles['Normal'].leading = 15
-doc = SimpleDocTemplate('docs/derivations/D6-prefix-cost-model.pdf', pagesize=A4,
+doc = SimpleDocTemplate('docs/derivations/extra/D6_prefix_supplement.pdf', pagesize=A4,
                         title='D6 prefix maximum cost model', author='Adi Jain')
 story = []
 

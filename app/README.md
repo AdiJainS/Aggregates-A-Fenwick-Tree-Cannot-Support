@@ -23,7 +23,7 @@ Queries use zero-based [left,right): left included, right excluded. Input begins
 
 Diagnostic counters on stderr include construction, tree operations, and small-test invariant audits; oracle arithmetic is excluded. They are not isolated benchmark timings. Five-run timing means/spread, cache profiling, the Structure B comparison, failure shrinking, adversarial generators, and the final tagged team release remain separate team deliverables.
 
-The generic segment tree is the Architect application's runnable reference backend. Coordinate its replacement with Structure A's owner. A Structure B maximum-only adapter is not implemented here. The D3 proof is in docs/derivations/D3-architect.pdf.
+The generic segment tree is the Architect application's runnable reference backend. Coordinate its replacement with Structure A's owner. A Structure B maximum-only adapter is not implemented here. The D3 proof is in docs/derivations/D3_250041005.pdf.
 
 ## Short replay example
 

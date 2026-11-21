@@ -61,7 +61,7 @@ The implementation stores maxima for blocks in two directional Fenwick arrays. A
 
 For one-based internal index $i$, write lowbit$(i)$ for its lowest set bit. The first tree stores the maximum on $[i-\text{lowbit}(i)+1,i]$; the second stores the maximum on $[i,\min(n,i+\text{lowbit}(i)-1)]$. The invariant says each stored value is the true maximum of its block. The query walks from both endpoints toward the unique position with the largest lowbit in the range. The blocks visited from the left cover the positions before that point; those from the right cover the positions after it; the remaining position is read directly. Thus their union is the requested range without gaps. Each successive lowbit at least doubles, so each walk has at most $\lfloor\log_2 w\rfloor$ steps.
 
-For an assignment, unaffected blocks retain their maxima. The update recomputes affected blocks using partial maxima from their unchanged parts and the new value, including when the old maximum is decreased. The D2 proof states the block invariant and gives the detailed walk-by-walk argument in <code>docs/derivations/D2-structureB-draft.md</code>. The bound concerns its counted algorithmic steps; it is not a claim that every update takes the same elapsed time.
+For an assignment, unaffected blocks retain their maxima. The update recomputes affected blocks using partial maxima from their unchanged parts and the new value, including when the old maximum is decreased. The D2 proof states the block invariant and gives the detailed walk-by-walk argument in <code>docs/derivations/sources/D2-structureB-draft.md</code>. The bound concerns its counted algorithmic steps; it is not a claim that every update takes the same elapsed time.
 
 ![Figure 2. Structure B covers a requested range by traversing blocks from both ends.](docs/report-images/figure-02.png)
 
@@ -79,7 +79,7 @@ For D4, the failed step is the cancellation used in a sum query: from $P(r)=P(l-
 
 ## 3. GCD derivation
 
-GCD is associative and has identity zero, so a segment tree can combine node GCDs over a disjoint cover of a query. A query selects $O(\log n)$ blocks. The direct bound with Euclid is $O(\log n \log V)$ remainder operations for values bounded by $V$. The architect’s stronger analysis considers the running GCD $g_i$: each positive $g_i$ divides the preceding $g_{i-1}$, and the logarithmic ratios telescope. Under constant-time word remainder, this yields $O(\log n+\log V)$ for a query. Updates recompute independent sibling pairs, so the safe update bound remains $O(\log n \log V)$. The detailed proof and zero cases are in <code>docs/derivations/D3.md</code>.
+GCD is associative and has identity zero, so a segment tree can combine node GCDs over a disjoint cover of a query. A query selects $O(\log n)$ blocks. The direct bound with Euclid is $O(\log n \log V)$ remainder operations for values bounded by $V$. The architect’s stronger analysis considers the running GCD $g_i$: each positive $g_i$ divides the preceding $g_{i-1}$, and the logarithmic ratios telescope. Under constant-time word remainder, this yields $O(\log n+\log V)$ for a query. Updates recompute independent sibling pairs, so the safe update bound remains $O(\log n \log V)$. The detailed proof and zero cases are in <code>docs/derivations/sources/D3.md</code>.
 
 The algebraic argument characterises $\gcd(a,b)$ by its common divisors: grouping three inputs differently leaves the set of common divisors unchanged, proving associativity; $\gcd(a,0)=a$ gives the identity. For the tighter query bound, Euclid’s work for a positive running value $g_{i-1}$ and next block can be bounded by $O(1+\log(g_{i-1}/g_i))$. Summing over $k$ selected blocks cancels the intermediate logarithms, leaving $O(k+\log V)$. Initial zero accumulators and zero block values contribute constant work per merge. The code uses two accumulator chains; each has the same bound and their final merge preserves it. This assumes constant-time word remainder and is not a bound on arbitrary-precision bit operations.
 
@@ -97,7 +97,7 @@ For the prefix baseline, consider $[5,3]$. Its full-prefix maximum is 5. After a
 
 ## 6. Predicted cost and experimental method
 
-The pre-measurement planning notes are in <code>docs/derivations/D6-analyst-draft.md</code>. For the prefix baseline, if $Q$ queries, $U_+$ nondecreasing updates and $U_-$ decreases are replayed, rebuilding on each decrease gives
+The pre-measurement planning notes are in <code>docs/derivations/sources/D6-analyst-draft.md</code>. For the prefix baseline, if $Q$ queries, $U_+$ nondecreasing updates and $U_-$ decreases are replayed, rebuilding on each decrease gives
 
 $$
 O(n+Q\log n+U_+\log n+nU_-).
